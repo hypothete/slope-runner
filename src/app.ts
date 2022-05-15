@@ -1,9 +1,8 @@
 import Camera from './camera';
 import Keyboard from './keyboard';
+import Level, { demoLevel } from './level';
 import Player from './player';
-
-const CANVAS_WIDTH = 320;
-const CANVAS_HEIGHT = 224;
+import { SCREEN_WIDTH, SCREEN_HEIGHT } from './common';
 
 enum GameState {
   Title,
@@ -16,14 +15,13 @@ class Game {
   player: Player;
   camera: Camera;
   keyboard: Keyboard;
+  levels: Level[];
+  activeLevel: number = -1;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   updateInterval?: number;
 
   constructor() {
-    this.camera = new Camera();
-    this.keyboard = new Keyboard();
-    this.player = new Player();
     const canvas = document.querySelector('canvas');
     if (!canvas) {
       throw new Error('No canvas found!');
@@ -34,7 +32,15 @@ class Game {
       throw new Error('Context could not be initialized!');
     }
     this.ctx = ctx;
+    this.camera = new Camera();
+    this.keyboard = new Keyboard();
+    this.player = new Player();
+    this.levels = [demoLevel];
     this.animate = this.animate.bind(this);
+  }
+
+  get level() {
+    return this.levels[this.activeLevel];
   }
 
   async start() {
@@ -68,6 +74,7 @@ class Game {
   updateTitle() {
     if (this.keyboard.keys['z']) {
       this.state = GameState.Playing;
+      this.startLevel(0);
     }
   }
 
@@ -82,16 +89,17 @@ class Game {
   drawTitle() {
     const { ctx } = this;
     ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    ctx.fillText('Press Z to start', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+    ctx.fillText('Press Z to start', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
   }
 
   drawPlaying() {
-    const { ctx } = this;
+    const { camera, ctx, player, level } = this;
     ctx.fillStyle = 'rgb(0, 0, 255)';
-    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    camera.render(ctx, player, level);
   }
 
   drawPaused() {
@@ -99,7 +107,12 @@ class Game {
     this.drawPlaying();
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center';
-    ctx.fillText('PAUSED', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+    ctx.fillText('PAUSED', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+  }
+
+  startLevel(levelIndex: number) {
+    this.activeLevel = levelIndex;
+    this.player.setPosition(this.level.startX, this.level.startY);
   }
 }
 

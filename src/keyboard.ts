@@ -4,7 +4,6 @@ class Keyboard {
   constructor() {
     window.addEventListener('keydown', keyEvent => {
       this.keys[keyEvent.key] = true;
-      console.log(keyEvent.key);
     });
 
     window.addEventListener('keyup', keyEvent => {
