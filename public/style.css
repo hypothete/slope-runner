@@ -7,3 +7,9 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+canvas {
+    width: 640px;
+    height: 448px;
+    image-rendering: pixelated;
+}

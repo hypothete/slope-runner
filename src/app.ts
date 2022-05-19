@@ -79,7 +79,9 @@ class Game {
   }
 
   updatePlaying() {
-
+    const { camera, keyboard, level, player } = this;
+    player.update(keyboard.keys, level);
+    camera.update();
   }
 
   updatePaused() {
@@ -112,7 +114,10 @@ class Game {
 
   startLevel(levelIndex: number) {
     this.activeLevel = levelIndex;
-    this.player.setPosition(this.level.startX, this.level.startY);
+    const { level, camera, player } = this;
+    player.setPosition(level.startX, level.startY);
+    camera.setBounds(level.pixelWidth, level.pixelHeight)
+    camera.setTarget(player);
   }
 }
 

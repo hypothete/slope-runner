@@ -1,28 +1,66 @@
-import { SCREEN_WIDTH, SCREEN_HEIGHT } from './common';
-
-const TILE_SIZE =  16;
-const CHUNK_SIZE = 128;
-const CHUNK_TILE_SIZE = 8;
+import {
+  SCREEN_WIDTH,
+  SCREEN_HEIGHT,
+  CHUNK_SIZE,
+  CHUNK_TILE_SIZE,
+  TILE_SIZE,
+  Direction,
+  Positioned
+} from './common';
 
 interface TileOptions {
   height: number[];
   hFlip: boolean;
   vFlip: boolean;
   angle: number;
-  solid: boolean[];
+  solid: Direction[];
   textures: number[];
 }
 
-class Tile {
+export class Tile {
   height = new Array(16).fill(0);
   hFlip: boolean = false;
   vFlip: boolean = false;
   angle = 0;
-  solid = new Array<boolean>(4).fill(false);
+  solid = new Array<Direction>(4);
   textures = new Array(4).fill(0);
 
   constructor(options: TileOptions) {
     Object.assign(this, options);
+  }
+
+  get isEmpty() {
+    return !this.height.some(column => column > 0);
+  }
+
+  get isFull() {
+    return this.height.every(column => column == 16);
+  }
+
+  getTileHeight(position: Positioned, direction: Direction) {
+    if (!this.solid.includes(direction)) return 0;
+
+    let { x, y } = position;
+    if (this.hFlip) {
+      x = TILE_SIZE - x;
+    }
+    if (this.vFlip) {
+      y = TILE_SIZE - y;
+    }
+
+    // todo fix wall cases
+    switch(direction) {
+      case Direction.Left: {
+        throw new Error("IMPLEMENT");
+      }
+      case Direction.Right: {
+        throw new Error("IMPLEMENT");
+      }
+      case Direction.Up: 
+      case Direction.Down:
+      default: 
+        return TILE_SIZE - y - this.height[x];
+    }
   }
 }
 
@@ -63,13 +101,25 @@ class Level {
     Object.assign(this, options);
   }
 
-  getTile(x: number, y: number) {
+  get pixelWidth() {
+    return this.width * CHUNK_SIZE;
+  }
+
+  get pixelHeight() {
+    return this.height * CHUNK_SIZE;
+  }
+
+  getTile(x: number, y: number): Tile {
+    // find which chunk it's in
     const chunkX = Math.floor(x / CHUNK_SIZE);
     const chunkY = Math.floor(y / CHUNK_SIZE);
     const chunkIndex = this.data[chunkY * this.width + chunkX];
     const chunk = this.chunks[chunkIndex];
-    const tileX = Math.floor((x - chunkX) / TILE_SIZE);
-    const tileY = Math.floor((y - chunkY) / TILE_SIZE);
+
+    // find position in the chunk
+    const tileX = Math.floor((x % CHUNK_SIZE) / TILE_SIZE);
+    const tileY = Math.floor((y % CHUNK_SIZE) / TILE_SIZE);
+
     const tileIndex = chunk.tiles[tileY * CHUNK_TILE_SIZE + tileX];
     return this.tiles[tileIndex];
   }
@@ -83,7 +133,7 @@ class Level {
       const tileY = Math.floor(i / CHUNK_TILE_SIZE);
       // todo get texture here
       // for now just draw red if solid
-      if (tile.solid.includes(true)) {
+      if (tile.solid.includes(Direction.Down)) {
         ctx.fillStyle = 'red';
         ctx.fillRect(x + tileX * TILE_SIZE, y + tileY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
       }
@@ -126,7 +176,7 @@ const demoLevel = new Level({
       hFlip: false,
       vFlip: false,
       angle: 0,
-      solid: [false, false, false, false],
+      solid: [],
       textures: [0,0,0,0]
     }),
     new Tile({
@@ -134,7 +184,7 @@ const demoLevel = new Level({
       hFlip: false,
       vFlip: false,
       angle: 0,
-      solid: [true, true, true, true],
+      solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
       textures: [0,0,0,0]
     }),
   ],
