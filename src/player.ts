@@ -141,6 +141,19 @@ class Player {
     }
   }
 
+  get stateString () {
+    switch(this.state) {
+      case PlayerState.Hurt:
+        return 'Hurt';
+      case PlayerState.Jumping:
+        return 'Jumping';
+      case PlayerState.Rolling:
+        return 'Rolling';
+      default:
+        return 'Standing';
+    }
+  }
+
   setPosition(x: number, y: number) {
     this.x = x;
     this.y = y;
@@ -203,6 +216,8 @@ class Player {
   checkFloorCollisions(level: Level) {
     const { sensorA, sensorB } = this;
 
+    if (this.ySpeed < 0) return;
+
     const checkSensor = (sensor: Positioned) => {
       let tile = level.getTile(sensor.x, sensor.y);
       let distAtSensor = 0;
@@ -231,24 +246,48 @@ class Player {
     const bDist = checkSensor(sensorB);
     const minDist = Math.min(aDist, bDist);
 
-    switch(this.rotation) {
-      case Direction.Left: {
-        this.x -= minDist;
-        break;
+    this.grounded = (minDist < TILE_SIZE);
+
+    if (this.grounded) {
+      switch(this.rotation) {
+        case Direction.Left: {
+          this.x -= minDist;
+          break;
+        }
+        case Direction.Right: {
+          this.x += minDist;
+          break;
+        }
+        case Direction.Up: {
+          this.y -= minDist;
+          break;
+        }
+        case Direction.Down:
+        default: {
+          this.y += minDist;
+          break;
+        }
       }
-      case Direction.Right: {
-        this.x += minDist;
-        break;
+      
+      if (this.state == PlayerState.Jumping) {
+        this.state = PlayerState.Standing;
       }
-      case Direction.Up: {
-        this.y -= minDist;
-        break;
-      }
-      case Direction.Down:
-      default: {
-        this.y += minDist;
-        break;
-      }
+      
+    }
+  }
+
+  checkJumpStart(input: PlayerInputState) {
+    if (input.jump && this.state !== PlayerState.Jumping) {
+      this.state = PlayerState.Jumping;
+      this.grounded = false;
+      this.xSpeed -= this.jumpForce * Math.sin(this.angle);
+      this.ySpeed -= this.jumpForce * Math.cos(this.angle);
+    }
+  }
+
+  checkJumpRelease(input: PlayerInputState) {
+    if (!input.jump && this.state == PlayerState.Jumping && this.ySpeed < -4) {
+      this.ySpeed = -4;
     }
   }
 
@@ -270,6 +309,7 @@ class Player {
       this.updateGroundSpeed();
 
       // check for starting a jump
+      this.checkJumpStart(inputState);
 
       // update ground speed based on directional input and apply friction
       this.updateSpeed(inputState);
@@ -282,10 +322,14 @@ class Player {
       this.y += Math.floor(this.ySpeed);
 
       // check floor and ceiling collisions
+      this.checkFloorCollisions(level);
+
       // check for falling when ground speed is too low on walls and ceilings
 
     } else if (!this.grounded) {
       // check for jump release
+      this.checkJumpRelease(inputState);
+
       // check for turning super
 
       // update X speed based on input
@@ -319,6 +363,7 @@ class Player {
       this.updateGroundSpeed();
 
       // check for starting a jump
+      this.checkJumpStart(inputState);
 
       // update ground speed based on directional input and apply accel/decel
       this.updateSpeed(inputState);
@@ -362,6 +407,12 @@ class Player {
       this.hitboxWidthRadius * 2 + 1,
       this.hitboxHeightRadius * 2 + 1
     );
+
+    // data
+    ctx.fillStyle = 'white';
+    ctx.fillText(`${this.ySpeed} ${this.grounded ? 'true' : 'false'}`, this.x + 32, this.y - 64);
+    ctx.fillText(`${this.stateString}`, this.x + 32, this.y - 48);
+    // ctx.fillText(`${}`, this.x + 32, this.y - 32);
   }
 }
 

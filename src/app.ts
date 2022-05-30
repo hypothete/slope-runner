@@ -20,6 +20,7 @@ class Game {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   updateInterval?: number;
+  gameSpeed = 30;
 
   constructor() {
     const canvas = document.querySelector('canvas');
@@ -44,7 +45,7 @@ class Game {
   }
 
   async start() {
-    this.updateInterval = window.setInterval(() => { this.update(); }, 17);
+    this.updateInterval = window.setInterval(() => { this.update(); }, this.gameSpeed);
     this.animate();
   }
 
@@ -72,10 +73,10 @@ class Game {
   }
 
   updateTitle() {
-    if (this.keyboard.keys['z']) {
+    //if (this.keyboard.keys['z']) {
       this.state = GameState.Playing;
       this.startLevel(0);
-    }
+    //}
   }
 
   updatePlaying() {
