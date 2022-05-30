@@ -249,6 +249,7 @@ class Player {
     this.grounded = (minDist < TILE_SIZE);
 
     if (this.grounded) {
+      // move to contact position
       switch(this.rotation) {
         case Direction.Left: {
           this.x -= minDist;
@@ -268,11 +269,10 @@ class Player {
           break;
         }
       }
-      
+
       if (this.state == PlayerState.Jumping) {
         this.state = PlayerState.Standing;
       }
-      
     }
   }
 

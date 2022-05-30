@@ -187,6 +187,22 @@ const demoLevel = new Level({
       solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
       textures: [0,0,0,0]
     }),
+    new Tile({
+      height: [16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9],
+      hFlip: false,
+      vFlip: false,
+      angle: 7 * Math.PI / 4,
+      solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
+      textures: [0,0,0,0]
+    }),
+    new Tile({
+      height: [8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1],
+      hFlip: false,
+      vFlip: false,
+      angle: 7 * Math.PI / 4,
+      solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
+      textures: [0,0,0,0]
+    }),
   ],
   chunks: [
     new Chunk({
@@ -213,12 +229,24 @@ const demoLevel = new Level({
         1, 1, 1, 1, 1, 1, 1, 1,
       ]
     }),
+    new Chunk({
+      tiles: [
+        2, 3, 0, 0, 0, 0, 0, 0,
+        1, 1, 2, 3, 0, 0, 0, 0,
+        1, 1, 1, 1, 2, 3, 0, 0,
+        1, 1, 1, 1, 1, 1, 2, 3,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1,
+      ]
+    }),
   ],
   data: [
     0, 0, 0, 0, 0, 0,
-    1, 1, 0, 0, 1, 1,
+    1, 1, 2, 0, 1, 1,
     0, 0, 0, 0, 0, 1,
-    1, 1, 1, 1, 0, 1,
+    1, 1, 1, 2, 0, 1,
     1, 1, 0, 0, 0, 1,
     1, 1, 1, 1, 1, 1,
   ]
