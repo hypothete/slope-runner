@@ -50,6 +50,8 @@ class Player {
   slopeRollDown = 0.3125;   // slope factor when rolling downhill
   rotateBack = 0.0491; // radians to rotate back to 0
 
+  debugString = '';
+
   get widthRadius () {
     return this.state === PlayerState.Standing ? this.standWidthRadius : this.rollWidthRadius;
   }
@@ -141,6 +143,68 @@ class Player {
     }
   }
 
+  get sensorE() {
+    switch(this.rotation) {
+      case Direction.Left: {
+        return {
+          x: this.x,
+          y: this.y + this.pushRadius
+        };
+      }
+      case Direction.Right: {
+        return {
+          x: this.x,
+          y: this.y - this.pushRadius
+        };
+      }
+      case Direction.Up: {
+        return {
+          x: this.x - this.pushRadius,
+          y: this.y
+        };
+      }
+      case Direction.Down:
+      default: {
+        return {
+          x: this.x + this.pushRadius,
+          y: this.y + this.angle === 0 ? 8 : 0
+        };
+      }
+    }
+  }
+
+  get sensorF() {
+    switch(this.rotation) {
+      case Direction.Left: {
+        return {
+          x: this.x,
+          y: this.y - this.pushRadius
+        };
+      }
+      case Direction.Right: {
+        return {
+          x: this.x,
+          y: this.y + this.pushRadius
+        };
+      }
+      case Direction.Up: {
+        return {
+          x: this.x + this.pushRadius,
+          y: this.y
+        };
+      }
+      case Direction.Down:
+      default: {
+        return {
+          x: this.x - this.pushRadius,
+          y: this.y + this.angle === 0 ? 8 : 0
+        };
+      }
+    }
+  }
+
+  
+
   get stateString () {
     switch(this.state) {
       case PlayerState.Hurt:
@@ -181,6 +245,9 @@ class Player {
           // apply rolling friction
           this.groundSpeed -= Math.sign(this.groundSpeed) * Math.min(Math.abs(this.groundSpeed), this.friction / 2);
         }
+        if (Math.abs(this.groundSpeed) < this.friction && !input.down) {
+          this.state = PlayerState.Standing;
+        }
       } else if (this.state === PlayerState.Standing) {
         if (input.left) {
           this.groundSpeed -= this.groundSpeed > 0 ? this.deceleration : this.acceleration;
@@ -218,7 +285,7 @@ class Player {
 
     if (this.ySpeed < 0) return;
 
-    const checkSensor = (sensor: Positioned) => {
+    const checkSensor = (sensor: Positioned): number => {
       let tile = level.getTile(sensor.x, sensor.y);
       let distAtSensor = 0;
       if (tile.isEmpty) {
@@ -238,7 +305,8 @@ class Player {
         x: sensor.x % TILE_SIZE,
         y: sensor.y % TILE_SIZE
       }
-      distAtSensor += tile.getTileHeight(tileOffset, this.rotation);
+      const offset = tile.getCollisionOffset(tileOffset, this.rotation);
+      distAtSensor += offset.y;
       return distAtSensor;
     };
 
@@ -276,8 +344,61 @@ class Player {
     }
   }
 
+  checkWallCollisions(level: Level) {
+    // todo finish
+    const { sensorE, sensorF } = this;
+
+    const checkSensor = (sensor: Positioned, direction: Direction): number => {
+      const tile = level.getTile(sensor.x, sensor.y);
+      if (tile.isEmpty) {
+        return TILE_SIZE;
+      }
+
+      const tileOffset = {
+        x: sensor.x % TILE_SIZE,
+        y: sensor.y % TILE_SIZE
+      }
+      const offset = tile.getCollisionOffset(tileOffset, direction);
+      return offset.x;
+    };
+
+    if (this.grounded) {
+      if (this.groundSpeed < 0) {
+        const eDist = checkSensor(sensorE, Direction.Left);
+        if (eDist > 0) {
+          this.groundSpeed = 0;
+          this.xSpeed += eDist;
+          this.debugString = `${eDist}`;
+        }
+      } else {
+        const fDist = checkSensor(sensorF, Direction.Right);
+        if (fDist < 0) {
+          this.groundSpeed = 0;
+          this.xSpeed += fDist;
+          this.debugString = `${fDist}`;
+        }
+      }
+    } else {
+      if (this.xSpeed < 0) {
+        const eDist = checkSensor(sensorE, Direction.Left);
+        if (eDist > 0) {
+          this.x += eDist;
+          this.xSpeed = 0;
+          this.debugString = `${eDist}`;
+        }
+      } else {
+        const fDist = checkSensor(sensorF, Direction.Right);
+        if (fDist < 0) {
+          this.x += fDist;
+          this.xSpeed = 0;
+          this.debugString = `${fDist}`;
+        }
+      }
+    }
+  }
+
   checkJumpStart(input: PlayerInputState) {
-    if (input.jump && this.state !== PlayerState.Jumping) {
+    if (this.grounded && input.jump && this.state !== PlayerState.Jumping) {
       this.state = PlayerState.Jumping;
       this.grounded = false;
       this.xSpeed -= this.jumpForce * Math.sin(this.angle);
@@ -315,6 +436,8 @@ class Player {
       this.updateSpeed(inputState);
 
       // check wall collisions
+      this.checkWallCollisions(level);
+      
       // handle camera boundaries
 
       // update position
@@ -350,6 +473,7 @@ class Player {
       }
 
       // check wall collisions
+      this.checkWallCollisions(level);
 
       // check floor and ceiling collisions
       this.checkFloorCollisions(level);
@@ -370,9 +494,10 @@ class Player {
 
       // check for starting animations like ducking or balancing
       // check wall collisions
+      this.checkWallCollisions(level);
 
       // check for starting a roll
-      if (this.groundSpeed !== 0 && inputState.down) {
+      if (inputState.down) {
         this.state = PlayerState.Rolling;
       }
 
@@ -410,9 +535,9 @@ class Player {
 
     // data
     ctx.fillStyle = 'white';
-    ctx.fillText(`${this.ySpeed} ${this.grounded ? 'true' : 'false'}`, this.x + 32, this.y - 64);
+    ctx.fillText(`${this.groundSpeed} ${this.grounded ? 'true' : 'false'}`, this.x + 32, this.y - 64);
     ctx.fillText(`${this.stateString}`, this.x + 32, this.y - 48);
-    // ctx.fillText(`${}`, this.x + 32, this.y - 32);
+    ctx.fillText(this.debugString, this.x + 32, this.y - 32);
   }
 }
 

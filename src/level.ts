@@ -20,7 +20,7 @@ interface TileOptions {
 }
 
 export class Tile {
-  height = new Array(16).fill(0);
+  height: number[] = new Array(16).fill(0);
   hFlip: boolean = false;
   vFlip: boolean = false;
   angle = 0;
@@ -37,6 +37,62 @@ export class Tile {
 
   get isFull() {
     return this.height.every(column => column == 16);
+  }
+
+  getCollisionOffset(position: Positioned, direction: Direction): Positioned {
+    if (!this.solid.includes(direction)) return { x: 0, y: 0};
+    let { x, y } = position;
+    if (this.hFlip) {
+      x = TILE_SIZE - x;
+    }
+    if (this.vFlip) {
+      y = TILE_SIZE - y;
+    }
+    switch(direction) {
+      case Direction.Left: {
+        let dx = 0;
+        for(let i=15; i>x; i--) {
+          const minHeight = TILE_SIZE - this.height[i];
+          if (y < minHeight) {
+            break;
+          }
+          dx++;
+        }
+
+        return {
+          x: dx,
+          y: 0
+        }
+      }
+      case Direction.Right: {
+        let dx = 0;
+        for(let i=0; i<x; i++) {
+          const minHeight = TILE_SIZE - this.height[i];
+          if (y < minHeight) {
+            break;
+          }
+          dx--;
+        }
+
+        return {
+          x: dx,
+          y: 0
+        }
+      }
+      case Direction.Up: {
+        return {
+          x: 0,
+          y: TILE_SIZE - y + this.height[x]
+        };
+      }
+      case Direction.Down:
+      default: {
+        return {
+          x: 0,
+          y: TILE_SIZE - y - this.height[x]
+        };
+      }
+    }
   }
 
   getTileHeight(position: Positioned, direction: Direction) {
@@ -287,7 +343,7 @@ const demoLevel = new Level({
   data: [
     0, 0, 0, 0, 0, 0,
     1, 1, 2, 0, 1, 1,
-    0, 0, 0, 0, 0, 1,
+    1, 0, 0, 0, 0, 1,
     1, 1, 1, 2, 0, 1,
     1, 1, 0, 0, 0, 1,
     1, 1, 1, 1, 1, 1,
