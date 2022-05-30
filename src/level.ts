@@ -8,6 +8,8 @@ import {
   Positioned
 } from './common';
 
+const HALF_TILE = TILE_SIZE / 2;
+
 interface TileOptions {
   height: number[];
   hFlip: boolean;
@@ -23,7 +25,7 @@ export class Tile {
   vFlip: boolean = false;
   angle = 0;
   solid = new Array<Direction>(4);
-  textures = new Array(4).fill(0);
+  textures: number[] = new Array(4).fill(0);
 
   constructor(options: TileOptions) {
     Object.assign(this, options);
@@ -85,6 +87,7 @@ interface LevelOptions {
   data: number[]; // chunk ID array
   startX: number;
   startY: number;
+  tileSrc: string;
 }
 
 class Level {
@@ -96,6 +99,8 @@ class Level {
   data: number[] = [];
   startX = 0;
   startY = 0;
+  tileSrc?: string;
+  tileTexture?: HTMLImageElement;
 
   constructor(options: LevelOptions) {
     Object.assign(this, options);
@@ -107,6 +112,16 @@ class Level {
 
   get pixelHeight() {
     return this.height * CHUNK_SIZE;
+  }
+
+  async loadTexture() {
+    if (!this.tileSrc) {
+      throw new Error('No tile src for level!');
+    }
+    const tileImg = new Image();
+    tileImg.src = this.tileSrc;
+    await tileImg.decode();
+    this.tileTexture = tileImg;
   }
 
   getTile(x: number, y: number): Tile {
@@ -124,6 +139,37 @@ class Level {
     return this.tiles[tileIndex];
   }
 
+  drawTile(ctx: CanvasRenderingContext2D, tile: Tile, x: number, y: number) {
+    tile.textures.forEach((texIndex, index) => {
+      const dx = index % 2;
+      const dy = Math.floor(index / 2);
+      if (
+        this.tileTexture &&
+        texIndex * HALF_TILE < this.tileTexture.width
+      ) {
+        ctx.drawImage(
+          this.tileTexture,
+          texIndex * HALF_TILE,
+          0,
+          HALF_TILE,
+          HALF_TILE,
+          x + dx * HALF_TILE,
+          y + dy * HALF_TILE,
+          HALF_TILE,
+          HALF_TILE
+        );
+      } else {
+        ctx.fillStyle = 'red';
+        ctx.fillRect(
+          x + dx * HALF_TILE,
+          y + dy * HALF_TILE,
+          HALF_TILE,
+          HALF_TILE
+        );
+      }
+    });
+  }
+
   drawChunk(ctx: CanvasRenderingContext2D, index: number, x: number, y: number) {
     const chunk = this.chunks[index];
     for(let i=0; i<chunk.tiles.length; i++) {
@@ -131,12 +177,7 @@ class Level {
       const tile = this.tiles[tileIndex];
       const tileX = i % CHUNK_TILE_SIZE;
       const tileY = Math.floor(i / CHUNK_TILE_SIZE);
-      // todo get texture here
-      // for now just draw red if solid
-      if (tile.solid.includes(Direction.Down)) {
-        ctx.fillStyle = 'red';
-        ctx.fillRect(x + tileX * TILE_SIZE, y + tileY * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-      }
+      this.drawTile(ctx, tile, x + tileX * TILE_SIZE, y + tileY * TILE_SIZE);
     }
 
     // todo use debug flag to view other properties
@@ -170,6 +211,7 @@ const demoLevel = new Level({
   height: 6,
   startX: 32,
   startY: 96,
+  tileSrc: './tiles.png',
   tiles: [
     new Tile({
       height: new Array(16),
@@ -185,7 +227,7 @@ const demoLevel = new Level({
       vFlip: false,
       angle: 0,
       solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
-      textures: [0,0,0,0]
+      textures: [1,1,1,1]
     }),
     new Tile({
       height: [16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9],
@@ -193,7 +235,7 @@ const demoLevel = new Level({
       vFlip: false,
       angle: 7 * Math.PI / 4,
       solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
-      textures: [0,0,0,0]
+      textures: [3,4,1,1]
     }),
     new Tile({
       height: [8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1],
@@ -201,7 +243,7 @@ const demoLevel = new Level({
       vFlip: false,
       angle: 7 * Math.PI / 4,
       solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
-      textures: [0,0,0,0]
+      textures: [0,0,3,4]
     }),
   ],
   chunks: [

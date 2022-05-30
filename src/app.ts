@@ -113,9 +113,10 @@ class Game {
     ctx.fillText('PAUSED', SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
   }
 
-  startLevel(levelIndex: number) {
+  async startLevel(levelIndex: number) {
     this.activeLevel = levelIndex;
     const { level, camera, player } = this;
+    await level.loadTexture();
     player.setPosition(level.startX, level.startY);
     camera.setBounds(level.pixelWidth, level.pixelHeight)
     camera.setTarget(player);
