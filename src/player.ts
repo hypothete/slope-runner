@@ -246,9 +246,11 @@ class Player {
     if (this.state === PlayerState.Rolling) {
       const upOrDown = Math.sign(sinGroundAngle) === Math.sign(this.groundSpeed);
       slopeFactor = upOrDown ? this.slopeRollUp : this.slopeRollDown;
+      this.groundSpeed -= slopeFactor * sinGroundAngle;
+    } else if (Math.abs(slopeFactor * sinGroundAngle) > 0.05078125){
+      // magic number from later games
+      this.groundSpeed -= slopeFactor * sinGroundAngle;
     }
-    // todo I think there's a bug here where slopes keep ticking up groundSpeed
-    this.groundSpeed -= slopeFactor * sinGroundAngle;
   }
 
   updateSpeed(input: PlayerInputState) {
@@ -295,7 +297,6 @@ class Player {
 
     // cap X speed
     this.xSpeed = Math.sign(this.xSpeed) * Math.min(Math.abs(this.xSpeed), this.maxXSpeed);
-    // todo finish
   }
 
   applyAirDrag() {
