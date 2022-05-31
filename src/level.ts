@@ -165,8 +165,12 @@ class Level {
     const tileX = Math.floor((x % CHUNK_SIZE) / TILE_SIZE);
     const tileY = Math.floor((y % CHUNK_SIZE) / TILE_SIZE);
 
-    const tileIndex = chunk.tiles[tileY * CHUNK_TILE_SIZE + tileX];
-    return this.tiles[tileIndex];
+    try {
+      const tileIndex = chunk.tiles[tileY * CHUNK_TILE_SIZE + tileX];
+      return this.tiles[tileIndex];
+    } catch {
+      return this.tiles[0];
+    }
   }
 
   drawTile(ctx: CanvasRenderingContext2D, tile: Tile, x: number, y: number) {
@@ -235,7 +239,7 @@ export default Level;
 
 const demoLevel = new Level({
   name: 'Demo Level',
-  width: 6,
+  width: 10,
   height: 6,
   startX: 160,
   startY: 96,
@@ -313,12 +317,12 @@ const demoLevel = new Level({
     }),
   ],
   data: [
-    1, 0, 0, 0, 0, 0,
-    1, 1, 2, 0, 1, 1,
-    1, 0, 0, 0, 0, 1,
-    1, 1, 1, 2, 0, 1,
-    1, 1, 0, 0, 0, 1,
-    1, 1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 1, 2, 0, 0, 1, 2, 0, 0, 1,
+    1, 0, 0, 0, 1, 1, 1, 1, 0, 1,
+    1, 1, 1, 2, 0, 1, 0, 0, 0, 1,
+    1, 1, 0, 0, 0, 0, 0, 2, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   ]
 });
 
