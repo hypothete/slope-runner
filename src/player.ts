@@ -458,6 +458,41 @@ class Player {
       }
 
       this.angle = minCheck.tile.angle;
+
+      // handle ground collision direction transfer
+      if (!this.grounded) {
+        if (this.ySpeed > 0) {
+          if (this.angle <= Math.PI / 8 || this.angle > 15 * Math.PI / 8) {
+            // shallow downward
+            this.groundSpeed = this.xSpeed;
+          } else if (
+            (this.angle > Math.PI && this.angle <= 7 * Math.PI / 4) ||
+            (this.angle > Math.PI / 4 && this.angle <= Math.PI / 2)) {
+            // full steep downward
+            if (Math.abs(this.xSpeed) > this.ySpeed) {
+              this.groundSpeed = this.xSpeed;
+            } else {
+              this.groundSpeed = -this.ySpeed * Math.sign(Math.sin(this.angle));
+            }
+          } else {
+            // half steep downward
+            if (Math.abs(this.xSpeed) > this.ySpeed) {
+              this.groundSpeed = this.xSpeed;
+            } else {
+              this.groundSpeed = -this.ySpeed * 0.5 * Math.sign(Math.sin(this.angle));
+            }
+          }
+        } else {
+          if (this.angle > 3 * Math.PI / 4 && this.angle < 5 * Math.PI / 4) {
+            // hit ceiling
+            this.ySpeed = 0;
+          } else {
+            // upper slope
+            this.groundSpeed = -this.ySpeed * Math.sign(Math.sin(this.angle));
+          }
+        }
+      }
+
       this.grounded = true;
 
       if (this.state == PlayerState.Jumping) {
@@ -525,6 +560,7 @@ class Player {
     if (this.grounded && input.jump && this.state !== PlayerState.Jumping && this.spinrev === 0) {
       this.state = PlayerState.Jumping;
       this.grounded = false;
+      this.groundSpeed = 0;
       this.xSpeed -= this.jumpForce * Math.sin(this.angle);
       this.ySpeed -= this.jumpForce * Math.cos(this.angle);
     }
@@ -706,7 +742,7 @@ class Player {
 
     // data
     ctx.fillStyle = 'white';
-    ctx.fillText(`${this.groundSpeed} ${this.grounded ? 'true' : 'false'}`, this.x + 32, this.y - 50);
+    ctx.fillText(`${this.groundSpeed} ${this.grounded ? 'true' :'false'}`, this.x + 32, this.y - 50);
     ctx.fillText(this.rotationString, this.x + 32, this.y - 40);
     ctx.fillText(this.angle + '', this.x + 32, this.y - 30);
     ctx.fillText(this.stateString, this.x + 32, this.y - 20);
