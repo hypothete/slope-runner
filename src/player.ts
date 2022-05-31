@@ -159,15 +159,15 @@ class Player {
       }
       case Direction.Up: {
         return {
-          x: this.x - this.pushRadius,
+          x: this.x + this.pushRadius,
           y: this.y
         };
       }
       case Direction.Down:
       default: {
         return {
-          x: this.x + this.pushRadius,
-          y: this.y + this.angle === 0 ? 8 : 0
+          x: this.x - this.pushRadius,
+          y: this.y + (this.angle === 0 ? 8 : 0)
         };
       }
     }
@@ -189,15 +189,15 @@ class Player {
       }
       case Direction.Up: {
         return {
-          x: this.x + this.pushRadius,
+          x: this.x - this.pushRadius,
           y: this.y
         };
       }
       case Direction.Down:
       default: {
         return {
-          x: this.x - this.pushRadius,
-          y: this.y + this.angle === 0 ? 8 : 0
+          x: this.x + this.pushRadius,
+          y: this.y + (this.angle === 0 ? 8 : 0)
         };
       }
     }
@@ -351,7 +351,7 @@ class Player {
     const checkSensor = (sensor: Positioned, direction: Direction): number => {
       const tile = level.getTile(sensor.x, sensor.y);
       if (tile.isEmpty) {
-        return TILE_SIZE;
+        return 0;
       }
 
       const tileOffset = {
@@ -362,39 +362,25 @@ class Player {
       return offset.x;
     };
 
-    if (this.grounded) {
-      if (this.groundSpeed < 0) {
-        const eDist = checkSensor(sensorE, Direction.Left);
-        if (eDist > 0) {
-          this.groundSpeed = 0;
-          this.xSpeed += eDist;
-          this.debugString = `${eDist}`;
-        }
+    const activeSensor =
+    (this.grounded ? this.groundSpeed : this.xSpeed) < 0 ? sensorE : sensorF;
+
+    const activeDirection = 
+      (this.grounded ? this.groundSpeed : this.xSpeed) < 0 ? Direction.Left : Direction.Right;
+    
+    const offsetDist = checkSensor(activeSensor, activeDirection);
+
+    if (offsetDist !== 0) {
+      if (this.grounded) {
+        this.groundSpeed = 0;
+        this.xSpeed += offsetDist;
       } else {
-        const fDist = checkSensor(sensorF, Direction.Right);
-        if (fDist < 0) {
-          this.groundSpeed = 0;
-          this.xSpeed += fDist;
-          this.debugString = `${fDist}`;
-        }
-      }
-    } else {
-      if (this.xSpeed < 0) {
-        const eDist = checkSensor(sensorE, Direction.Left);
-        if (eDist > 0) {
-          this.x += eDist;
-          this.xSpeed = 0;
-          this.debugString = `${eDist}`;
-        }
-      } else {
-        const fDist = checkSensor(sensorF, Direction.Right);
-        if (fDist < 0) {
-          this.x += fDist;
-          this.xSpeed = 0;
-          this.debugString = `${fDist}`;
-        }
+        this.x += offsetDist;
+        this.xSpeed = 0;
       }
     }
+   
+    this.debugString = `${offsetDist}`;
   }
 
   checkJumpStart(input: PlayerInputState) {
@@ -410,6 +396,11 @@ class Player {
     if (!input.jump && this.state == PlayerState.Jumping && this.ySpeed < -4) {
       this.ySpeed = -4;
     }
+  }
+
+  updatePosition() {
+    this.x += Math.floor(this.xSpeed);
+    this.y += Math.floor(this.ySpeed);
   }
 
   handleInput(keys: Record<string, boolean>): PlayerInputState {
@@ -441,8 +432,7 @@ class Player {
       // handle camera boundaries
 
       // update position
-      this.x += Math.floor(this.xSpeed);
-      this.y += Math.floor(this.ySpeed);
+      this.updatePosition();
 
       // check floor and ceiling collisions
       this.checkFloorCollisions(level);
@@ -462,8 +452,7 @@ class Player {
       this.applyAirDrag();
 
       // update position
-      this.x += Math.floor(this.xSpeed);
-      this.y += Math.floor(this.ySpeed);
+      this.updatePosition();
 
       // rotate angle back to 0
       if (this.angle > 0) {
@@ -504,8 +493,7 @@ class Player {
       // handle camera boundaries
 
       // update position
-      this.x += Math.floor(this.xSpeed);
-      this.y += Math.floor(this.ySpeed);
+      this.updatePosition();
 
       // check floor and ceiling collisions
       this.checkFloorCollisions(level);
@@ -532,6 +520,18 @@ class Player {
       this.hitboxWidthRadius * 2 + 1,
       this.hitboxHeightRadius * 2 + 1
     );
+
+    // sensors
+    const {sensorA, sensorB, sensorE, sensorF} = this;
+    const sensors = [sensorA, sensorB, sensorE, sensorF];
+    const colors = ['#00ff00', '#00cc66', '#ff00ff', '#ff0000'];
+    sensors.forEach((sensor, index) => {
+      ctx.strokeStyle = colors[index];
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(sensor.x, sensor.y);
+      ctx.stroke();
+    });
 
     // data
     ctx.fillStyle = 'white';

@@ -53,7 +53,7 @@ export class Tile {
         let dx = 0;
         for(let i=15; i>x; i--) {
           const minHeight = TILE_SIZE - this.height[i];
-          if (y < minHeight) {
+          if (y <= minHeight) {
             break;
           }
           dx++;
@@ -68,7 +68,7 @@ export class Tile {
         let dx = 0;
         for(let i=0; i<x; i++) {
           const minHeight = TILE_SIZE - this.height[i];
-          if (y < minHeight) {
+          if (y <= minHeight) {
             break;
           }
           dx--;
@@ -265,7 +265,7 @@ const demoLevel = new Level({
   name: 'Demo Level',
   width: 6,
   height: 6,
-  startX: 32,
+  startX: 160,
   startY: 96,
   tileSrc: './tiles.png',
   tiles: [
@@ -341,7 +341,7 @@ const demoLevel = new Level({
     }),
   ],
   data: [
-    0, 0, 0, 0, 0, 0,
+    1, 0, 1, 0, 0, 0,
     1, 1, 2, 0, 1, 1,
     1, 0, 0, 0, 0, 1,
     1, 1, 1, 2, 0, 1,
