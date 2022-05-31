@@ -293,7 +293,17 @@ class Player {
   }
 
   checkFloorCollisions(level: Level) {
-    if (this.ySpeed < 0) return;
+    if (!this.grounded) {
+      if (
+        (Math.abs(this.xSpeed) < Math.abs(this.ySpeed)) && // not going mostly left or right
+        this.ySpeed < 0
+        )
+      {
+        // mostly going up
+        return;
+      }
+    }
+
     const { sensorA, sensorB } = this;
 
     interface FloorSensorDetails {
