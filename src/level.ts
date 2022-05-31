@@ -51,7 +51,7 @@ export class Tile {
     switch(direction) {
       case Direction.Left: {
         let dx = 0;
-        for(let i=15; i>x; i--) {
+        for(let i=TILE_SIZE; i>x; i--) {
           const minHeight = TILE_SIZE - this.height[i];
           if (y <= minHeight) {
             break;
