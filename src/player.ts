@@ -242,6 +242,7 @@ class Player {
       const upOrDown = Math.sign(sinGroundAngle) === Math.sign(this.groundSpeed);
       slopeFactor = upOrDown ? this.slopeRollUp : this.slopeRollDown;
     }
+    // todo I think there's a bug here where slopes keep ticking up groundSpeed
     this.groundSpeed -= slopeFactor * sinGroundAngle;
   }
 
@@ -275,6 +276,12 @@ class Player {
       this.xSpeed = this.groundSpeed * Math.cos(this.angle);
       this.ySpeed = -this.groundSpeed * Math.sin(this.angle);
     } else {
+      // apply input
+      if (input.left) {
+        this.xSpeed -= this.airAcceleration;
+      } else if (input.right) {
+        this.xSpeed += this.airAcceleration;
+      }
       // apply gravity
       this.ySpeed += GRAVITY;
       // cap fall speed
