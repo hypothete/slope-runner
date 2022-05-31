@@ -3,6 +3,7 @@ import Level, { Tile } from './level';
 
 enum PlayerState {
   Standing,
+  Crouching,
   Jumping,
   Rolling,
   Hurt,
@@ -27,6 +28,8 @@ class Player {
   grounded = true;
   state = PlayerState.Standing;
   controlLockTimer = 0;
+  spinrev = 0;
+  facing = true; // right = true
 
   standWidthRadius = 9;
   standHeightRadius = 19;
@@ -211,6 +214,8 @@ class Player {
         return 'Jumping';
       case PlayerState.Rolling:
         return 'Rolling';
+      case PlayerState.Crouching:
+        return 'Crouching';
       default:
         return 'Standing';
     }
@@ -516,7 +521,7 @@ class Player {
   }
 
   checkJumpStart(input: PlayerInputState) {
-    if (this.grounded && input.jump && this.state !== PlayerState.Jumping) {
+    if (this.grounded && input.jump && this.state !== PlayerState.Jumping && this.spinrev === 0) {
       this.state = PlayerState.Jumping;
       this.grounded = false;
       this.xSpeed -= this.jumpForce * Math.sin(this.angle);
@@ -530,12 +535,34 @@ class Player {
     }
   }
 
+  checkSpindash(input: PlayerInputState) {
+    if (this.state === PlayerState.Crouching && input.down) {
+      if (input.jump) {
+        this.spinrev += 2;
+      }
+      this.spinrev -= (Math.floor(this.spinrev / 0.125) / 256);
+    } else if (this.spinrev !== 0) {
+      this.state = PlayerState.Rolling;
+      this.groundSpeed = (this.facing ? 1 : -1) * (8 + Math.floor(this.spinrev) / 2);
+      this.spinrev = 0;
+    }
+    if (this.spinrev > 0) {
+      this.spinrev = Math.min(this.spinrev, 12);
+    }
+  }
+
   updatePosition() {
     this.x += Math.floor(this.xSpeed);
     this.y += Math.floor(this.ySpeed);
   }
 
   handleInput(keys: Record<string, boolean>): PlayerInputState {
+    // handle facing here
+    if (keys.ArrowLeft) {
+      this.facing = false;
+    } else if (keys.ArrowRight) {
+      this.facing = true;
+    }
     return {
       left: keys.ArrowLeft,
       right: keys.ArrowRight,
@@ -602,7 +629,9 @@ class Player {
       // "normal"
 
       // check for animations like balancing
+
       // check for starting a spindash
+      this.checkSpindash(inputState);
 
       // adjust ground speed based on current ground angle
       this.updateGroundSpeed();
@@ -619,8 +648,12 @@ class Player {
       this.checkWallCollisions(level);
 
       // check for starting a roll
-      if (inputState.down) {
+      if (inputState.down && this.groundSpeed !== 0) {
         this.state = PlayerState.Rolling;
+      } else if (inputState.down) {
+        this.state = PlayerState.Crouching;
+      } else if (this.groundSpeed === 0) {
+        this.state = PlayerState.Standing;
       }
 
       // handle camera boundaries
@@ -666,11 +699,17 @@ class Player {
       ctx.stroke();
     });
 
+    // facing
+    ctx.fillStyle = 'red';
+    ctx.fillText(this.facing ? '➡️' : '⬅️', this.x, this.y);
+
     // data
     ctx.fillStyle = 'white';
-    ctx.fillText(`${this.groundSpeed} ${this.grounded ? 'true' : 'false'}`, this.x + 32, this.y - 64);
-    ctx.fillText(this.rotationString, this.x + 32, this.y - 48);
-    ctx.fillText(this.angle + '', this.x + 32, this.y - 32);
+    ctx.fillText(`${this.groundSpeed} ${this.grounded ? 'true' : 'false'}`, this.x + 32, this.y - 50);
+    ctx.fillText(this.rotationString, this.x + 32, this.y - 40);
+    ctx.fillText(this.angle + '', this.x + 32, this.y - 30);
+    ctx.fillText(this.stateString, this.x + 32, this.y - 20);
+    ctx.fillText(this.spinrev + '', this.x + 32, this.y - 10);
   }
 }
 
