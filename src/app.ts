@@ -1,6 +1,7 @@
 import Camera from './camera';
 import Keyboard from './keyboard';
-import Level, { demoLevel } from './level';
+import Level from './level';
+import demoLevel from './demo-level';
 import Player from './player';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from './common';
 

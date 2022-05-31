@@ -12,7 +12,7 @@ const HALF_TILE = TILE_SIZE / 2;
 
 interface TileOptions {
   height: number[];
-  hFlip: boolean;
+  hFlip: boolean; // used for reading heights and drawing tile
   vFlip: boolean;
   angle: number;
   solid: Direction[];
@@ -100,7 +100,7 @@ interface ChunkOptions {
   tiles: number[];
 }
 
-class Chunk {
+export class Chunk {
   tiles = new Array(64);
 
   constructor(options: ChunkOptions) {
@@ -174,6 +174,18 @@ class Level {
   }
 
   drawTile(ctx: CanvasRenderingContext2D, tile: Tile, x: number, y: number) {
+    ctx.save();
+
+    ctx.translate(
+      tile.hFlip ? x + TILE_SIZE : x,
+      tile.vFlip ? y + TILE_SIZE : y,
+    );
+
+    ctx.scale(
+      tile.hFlip ? -1 : 1,
+      tile.vFlip ? -1 : 1
+    );
+    
     tile.textures.forEach((texIndex, index) => {
       const dx = index % 2;
       const dy = Math.floor(index / 2);
@@ -187,21 +199,23 @@ class Level {
           0,
           HALF_TILE,
           HALF_TILE,
-          x + dx * HALF_TILE,
-          y + dy * HALF_TILE,
+          dx * HALF_TILE,
+          dy * HALF_TILE,
           HALF_TILE,
           HALF_TILE
         );
       } else {
         ctx.fillStyle = 'red';
         ctx.fillRect(
-          x + dx * HALF_TILE,
-          y + dy * HALF_TILE,
+          dx * HALF_TILE,
+          dy * HALF_TILE,
           HALF_TILE,
           HALF_TILE
         );
       }
     });
+
+    ctx.restore();
   }
 
   drawChunk(ctx: CanvasRenderingContext2D, index: number, x: number, y: number) {
@@ -236,94 +250,3 @@ class Level {
 }
 
 export default Level;
-
-const demoLevel = new Level({
-  name: 'Demo Level',
-  width: 10,
-  height: 6,
-  startX: 160,
-  startY: 96,
-  tileSrc: './tiles.png',
-  tiles: [
-    new Tile({
-      height: new Array(16),
-      hFlip: false,
-      vFlip: false,
-      angle: 0,
-      solid: [],
-      textures: [0,0,0,0]
-    }),
-    new Tile({
-      height: new Array(16).fill(16),
-      hFlip: false,
-      vFlip: false,
-      angle: 0,
-      solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
-      textures: [1,1,1,1]
-    }),
-    new Tile({
-      height: [16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9],
-      hFlip: false,
-      vFlip: false,
-      angle: 15 * Math.PI / 8,
-      solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
-      textures: [3,4,1,1]
-    }),
-    new Tile({
-      height: [8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1],
-      hFlip: false,
-      vFlip: false,
-      angle: 15 * Math.PI / 8,
-      solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
-      textures: [0,0,3,4]
-    }),
-  ],
-  chunks: [
-    new Chunk({
-      tiles: [
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-      ]
-    }),
-    new Chunk({
-      tiles: [
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-      ]
-    }),
-    new Chunk({
-      tiles: [
-        2, 3, 0, 0, 0, 0, 0, 0,
-        1, 1, 2, 3, 0, 0, 0, 0,
-        1, 1, 1, 1, 2, 3, 0, 0,
-        1, 1, 1, 1, 1, 1, 2, 3,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1,
-      ]
-    }),
-  ],
-  data: [
-    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-    1, 1, 2, 0, 0, 1, 2, 0, 0, 1,
-    1, 0, 0, 0, 1, 1, 1, 1, 0, 1,
-    1, 1, 1, 2, 0, 1, 0, 0, 0, 1,
-    1, 1, 0, 0, 0, 0, 0, 2, 0, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-  ]
-});
-
-export { demoLevel };
