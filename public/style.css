@@ -12,4 +12,6 @@ canvas {
     width: 640px;
     height: 448px;
     image-rendering: pixelated;
+    font-smooth: never;
+    -webkit-font-smoothing : none;
 }

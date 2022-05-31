@@ -689,7 +689,7 @@ class Player {
         this.state = PlayerState.Rolling;
       } else if (inputState.down) {
         this.state = PlayerState.Crouching;
-      } else if (this.groundSpeed === 0) {
+      } else if (this.groundSpeed === 0 && this.state !== PlayerState.Jumping) {
         this.state = PlayerState.Standing;
       }
 

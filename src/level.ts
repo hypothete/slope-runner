@@ -169,6 +169,7 @@ class Level {
       const tileIndex = chunk.tiles[tileY * CHUNK_TILE_SIZE + tileX];
       return this.tiles[tileIndex];
     } catch {
+      // fall back to 0th tile in the set - probably empty
       return this.tiles[0];
     }
   }
