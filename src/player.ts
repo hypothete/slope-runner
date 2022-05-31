@@ -1,5 +1,5 @@
 import { Positioned, Direction, TILE_SIZE, GRAVITY } from './common';
-import Level from './level';
+import Level, { Tile } from './level';
 
 enum PlayerState {
   Standing,
@@ -203,8 +203,6 @@ class Player {
     }
   }
 
-  
-
   get stateString () {
     switch(this.state) {
       case PlayerState.Hurt:
@@ -215,6 +213,20 @@ class Player {
         return 'Rolling';
       default:
         return 'Standing';
+    }
+  }
+
+  get rotationString () {
+    switch(this.rotation) {
+      case Direction.Up:
+        return 'Up';
+      case Direction.Right:
+        return 'Right';
+      case Direction.Left:
+        return 'Left';
+      case Direction.Down:
+      default:
+        return 'Down';
     }
   }
 
@@ -261,7 +273,7 @@ class Player {
       }
       
       this.xSpeed = this.groundSpeed * Math.cos(this.angle);
-      this.ySpeed = this.groundSpeed * Math.sin(this.angle);
+      this.ySpeed = -this.groundSpeed * Math.sin(this.angle);
     } else {
       // apply gravity
       this.ySpeed += GRAVITY;
@@ -281,71 +293,159 @@ class Player {
   }
 
   checkFloorCollisions(level: Level) {
+    if (this.ySpeed < 0) return;
     const { sensorA, sensorB } = this;
 
-    if (this.ySpeed < 0) return;
+    interface FloorSensorDetails {
+      offset: Positioned;
+      tile: Tile;
+    }
 
-    const checkSensor = (sensor: Positioned): number => {
-      let tile = level.getTile(sensor.x, sensor.y);
-      let distAtSensor = 0;
+    const extendSensor = (sensor: Positioned) => {
+      switch(this.rotation) {
+        case Direction.Left: {
+          sensor.x -= TILE_SIZE;
+          break;
+        }
+        case Direction.Right: {
+          sensor.x += TILE_SIZE;
+          break;
+        }
+        case Direction.Up: {
+          sensor.y -= TILE_SIZE;
+          break;
+        }
+        case Direction.Down: {
+          sensor.y += TILE_SIZE;
+          break;
+        }
+      }
+    };
+
+    const regressSensor = (sensor: Positioned) => {
+      switch(this.rotation) {
+        case Direction.Left: {
+          sensor.x += TILE_SIZE;
+          break;
+        }
+        case Direction.Right: {
+          sensor.x -= TILE_SIZE;
+          break;
+        }
+        case Direction.Up: {
+          sensor.y += TILE_SIZE;
+          break;
+        }
+        case Direction.Down: {
+          sensor.y -= TILE_SIZE;
+          break;
+        }
+      }
+    };
+
+    const checkSensor = (sensor: Positioned): FloorSensorDetails => {
+      const tileCheckPosition = {
+        x: sensor.x,
+        y: sensor.y
+      };
+
+      let tile = level.getTile(tileCheckPosition.x, tileCheckPosition.y);
+
       if (tile.isEmpty) {
-        distAtSensor += TILE_SIZE;
-        tile = level.getTile(sensor.x, sensor.y + TILE_SIZE);
+        // extension
+        extendSensor(tileCheckPosition);
+        tile = level.getTile(tileCheckPosition.x, tileCheckPosition.y);
+
       } else if (tile.isFull) {
-        distAtSensor -= TILE_SIZE;
-        tile = level.getTile(sensor.x, sensor.y - TILE_SIZE);
-        // check again if last tile was full
+        // regression
+        regressSensor(tileCheckPosition);
+        tile = level.getTile(tileCheckPosition.x, tileCheckPosition.y);
+
         if (tile.isEmpty) {
-          distAtSensor += TILE_SIZE;
-          tile = level.getTile(sensor.x, sensor.y + TILE_SIZE);
+          extendSensor(tileCheckPosition);
+          tile = level.getTile(tileCheckPosition.x, tileCheckPosition.y);
         }
       }
 
       const tileOffset = {
-        x: sensor.x % TILE_SIZE,
-        y: sensor.y % TILE_SIZE
+        x: tileCheckPosition.x % TILE_SIZE,
+        y: tileCheckPosition.y % TILE_SIZE
       }
-      const offset = tile.getCollisionOffset(tileOffset, this.rotation);
-      distAtSensor += offset.y;
-      return distAtSensor;
+
+      const foundOffset = tile.getCollisionOffset(tileOffset, this.rotation);
+      // foundOffset does not take into account extension/regression
+
+      const totalOffset = {
+        x: tileCheckPosition.x + foundOffset.x - sensor.x,
+        y: tileCheckPosition.y + foundOffset.y - sensor.y,
+      }
+
+      return { offset: totalOffset, tile };
     };
 
-    const aDist = checkSensor(sensorA);
-    const bDist = checkSensor(sensorB);
-    const minDist = Math.min(aDist, bDist);
+    const checkA = checkSensor(sensorA);
+    const checkB = checkSensor(sensorB);
+    let minCheck: FloorSensorDetails;
+    let minDist = 14; // special term
 
-    this.grounded = (minDist < TILE_SIZE);
+    switch(this.rotation) {
+      case Direction.Left: {
+        const minX = Math.min(checkA.offset.x, checkB.offset.x);
+        minCheck = minX == checkA.offset.x ? checkA : checkB;
+        minDist = Math.abs(minX);
+        break;
+      }
+      case Direction.Right: {
+        const minX = Math.max(checkA.offset.x, checkB.offset.x);
+        minCheck = minX == checkA.offset.x ? checkA : checkB;
+        minDist = Math.abs(minX);
+        break;
+      }
+      case Direction.Up: {
+        const minY = Math.max(checkA.offset.y, checkB.offset.y);
+        minCheck = minY == checkA.offset.y ? checkA : checkB;
+        minDist = Math.abs(minY);
+        break;
+      }
+      case Direction.Down:
+      default: {
+        const minY = Math.min(checkA.offset.y, checkB.offset.y);
+        minCheck = minY == checkA.offset.y ? checkA : checkB;
+        minDist = Math.abs(minY);
+        break;
+      }
+    }
 
-    if (this.grounded) {
+    // at this point we know which check wins
+    if (minDist <= 14) {
       // move to contact position
+
       switch(this.rotation) {
-        case Direction.Left: {
-          this.x -= minDist;
-          break;
-        }
+        case Direction.Left:
         case Direction.Right: {
-          this.x += minDist;
+          this.x += minCheck.offset.x;
           break;
         }
-        case Direction.Up: {
-          this.y -= minDist;
-          break;
-        }
+        case Direction.Up:
         case Direction.Down:
         default: {
-          this.y += minDist;
+          this.y += minCheck.offset.y;
           break;
         }
       }
+
+      this.angle = minCheck.tile.angle;
+      this.grounded = true;
 
       if (this.state == PlayerState.Jumping) {
         this.state = PlayerState.Standing;
       }
+    } else {
+      this.grounded = false;
     }
   }
 
   checkWallCollisions(level: Level) {
-    // todo finish
     const { sensorE, sensorF } = this;
 
     const checkSensor = (sensor: Positioned, direction: Direction): number => {
@@ -371,12 +471,27 @@ class Player {
     const offsetDist = checkSensor(activeSensor, activeDirection);
 
     if (offsetDist !== 0) {
-      if (this.grounded) {
-        this.groundSpeed = 0;
-        this.xSpeed += offsetDist;
-      } else {
-        this.x += offsetDist;
-        this.xSpeed = 0;
+      this.groundSpeed = 0;
+      switch(this.rotation) {
+        case Direction.Left:
+        case Direction.Right: {
+          if (this.grounded) {
+            this.ySpeed += offsetDist;
+          } else {
+            this.y += offsetDist;
+            this.ySpeed = 0;
+          }
+        }
+        case Direction.Up:
+        case Direction.Down:
+        default: {
+          if (this.grounded) {
+            this.xSpeed += offsetDist;
+          } else {
+            this.x += offsetDist;
+            this.xSpeed = 0;
+          }
+        }
       }
     }
    
@@ -455,10 +570,10 @@ class Player {
       this.updatePosition();
 
       // rotate angle back to 0
-      if (this.angle > 0) {
-        this.angle -= this.rotateBack;
-      } else if (this.angle < 0) {
+      if (this.angle > Math.PI ) {
         this.angle += this.rotateBack;
+      } else {
+        this.angle -= this.rotateBack;
       }
 
       // check wall collisions
@@ -482,6 +597,7 @@ class Player {
       this.updateSpeed(inputState);
 
       // check for starting animations like ducking or balancing
+      
       // check wall collisions
       this.checkWallCollisions(level);
 
@@ -536,8 +652,8 @@ class Player {
     // data
     ctx.fillStyle = 'white';
     ctx.fillText(`${this.groundSpeed} ${this.grounded ? 'true' : 'false'}`, this.x + 32, this.y - 64);
-    ctx.fillText(`${this.stateString}`, this.x + 32, this.y - 48);
-    ctx.fillText(this.debugString, this.x + 32, this.y - 32);
+    ctx.fillText(this.rotationString, this.x + 32, this.y - 48);
+    ctx.fillText(this.angle + '', this.x + 32, this.y - 32);
   }
 }
 

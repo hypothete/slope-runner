@@ -51,7 +51,7 @@ export class Tile {
     switch(direction) {
       case Direction.Left: {
         let dx = 0;
-        for(let i=TILE_SIZE; i>x; i--) {
+        for(let i=TILE_SIZE-1; i>=x; i--) {
           const minHeight = TILE_SIZE - this.height[i];
           if (y <= minHeight) {
             break;
@@ -92,32 +92,6 @@ export class Tile {
           y: TILE_SIZE - y - this.height[x]
         };
       }
-    }
-  }
-
-  getTileHeight(position: Positioned, direction: Direction) {
-    if (!this.solid.includes(direction)) return 0;
-
-    let { x, y } = position;
-    if (this.hFlip) {
-      x = TILE_SIZE - x;
-    }
-    if (this.vFlip) {
-      y = TILE_SIZE - y;
-    }
-
-    // todo fix wall cases
-    switch(direction) {
-      case Direction.Left: {
-        throw new Error("IMPLEMENT");
-      }
-      case Direction.Right: {
-        throw new Error("IMPLEMENT");
-      }
-      case Direction.Up: 
-      case Direction.Down:
-      default: 
-        return TILE_SIZE - y - this.height[x];
     }
   }
 }
@@ -235,8 +209,6 @@ class Level {
       const tileY = Math.floor(i / CHUNK_TILE_SIZE);
       this.drawTile(ctx, tile, x + tileX * TILE_SIZE, y + tileY * TILE_SIZE);
     }
-
-    // todo use debug flag to view other properties
   }
 
   draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
@@ -289,7 +261,7 @@ const demoLevel = new Level({
       height: [16, 16, 15, 15, 14, 14, 13, 13, 12, 12, 11, 11, 10, 10, 9, 9],
       hFlip: false,
       vFlip: false,
-      angle: 7 * Math.PI / 4,
+      angle: 15 * Math.PI / 8,
       solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
       textures: [3,4,1,1]
     }),
@@ -297,7 +269,7 @@ const demoLevel = new Level({
       height: [8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1],
       hFlip: false,
       vFlip: false,
-      angle: 7 * Math.PI / 4,
+      angle: 15 * Math.PI / 8,
       solid: [Direction.Down, Direction.Up, Direction.Left, Direction.Right],
       textures: [0,0,3,4]
     }),
@@ -341,7 +313,7 @@ const demoLevel = new Level({
     }),
   ],
   data: [
-    1, 0, 1, 0, 0, 0,
+    1, 0, 0, 0, 0, 0,
     1, 1, 2, 0, 1, 1,
     1, 0, 0, 0, 0, 1,
     1, 1, 1, 2, 0, 1,
