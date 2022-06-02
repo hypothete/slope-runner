@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { RootState } from './store';
 import { EditorTab } from './reducers';
-import TabBar from './components/TabBar';
+import TabBar from './components/TabBar/TabBar';
 
 const App: FC = () => {
   const activeTab = useSelector((state: RootState) => state.editor.tab);

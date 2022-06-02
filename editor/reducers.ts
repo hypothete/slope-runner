@@ -16,7 +16,7 @@ const initialEditor: EditorState = {
   tab: EditorTab.Level
 };
 
-const setTab = createAction<EditorTab, 'SET_TAB'>('SET_TAB');
+export const setTab = createAction<EditorTab, 'SET_TAB'>('SET_TAB');
 
 export const editorReducer = createReducer(initialEditor, builder => {
   builder.addCase(setTab, (state, action) => {

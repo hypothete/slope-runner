@@ -1,13 +1,14 @@
 import React, { FC } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { RootState } from '../../store';
-import { EditorTab } from '../../reducers';
+import { EditorTab, setTab } from '../../reducers';
 
-import styles from './style.module.sass';
+import styles from './style.module.scss';
 
 const TabBar: FC = () => {
   const activeTab = useSelector((state: RootState) => state.editor.tab);
+  const dispatch = useDispatch();
 
   const tabs = [
     {
@@ -31,10 +32,18 @@ const TabBar: FC = () => {
   return (
     <ul className={styles.tabbar}>
       {
-        tabs.map(tab => (<li className={`${styles.tab} ${tab.value === activeTab ? styles.tab.active : ''}`}>{tab.label}</li>))
+        tabs.map(tab => (
+        <li
+          key={tab.label}
+          className={`${styles.tab} ${tab.value === activeTab ? styles.active : ''}`}
+          onClick={() => { dispatch(setTab(tab.value)) }}
+          >
+          {tab.label}
+        </li>
+      ))
       }
     </ul>
   );
 };
 
-export default App;
+export default TabBar;

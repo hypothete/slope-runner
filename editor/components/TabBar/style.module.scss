@@ -1,9 +1,15 @@
 .tabbar {
   display: flex;
   flex-direction: row;
+  list-style-type: none;
 
   .tab {
     border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    width: 4rem;
+    text-align: center;
+    margin: 0 4px;
+    border-radius: 8px;
 
     &.active {
       border: 1px solid rgba(0, 0, 0, 1);
