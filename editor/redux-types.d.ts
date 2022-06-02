@@ -24,5 +24,10 @@ type LevelData = {
   startX: number;
   startY: number;
   tileSrc: string;
-  chunks: number[]; // chunk ID array
+  data: number[]; // chunk ID array
+}
+
+interface LevelImportData extends LevelData {
+  chunks: ChunkData[];
+  tiles: TileData[];
 }

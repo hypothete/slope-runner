@@ -24,8 +24,8 @@ const TabBar: FC = () => {
       value: EditorTab.Level
     },
     {
-      label: 'Export',
-      value: EditorTab.Export
+      label: 'Load/Save',
+      value: EditorTab.LoadSave
     }
   ]
 

@@ -4,20 +4,23 @@ import { useSelector } from 'react-redux';
 import { RootState } from './store';
 import { EditorTab } from './reducers';
 import TabBar from './components/TabBar/TabBar';
+import Importer from './components/Importer/Importer';
 
 const App: FC = () => {
   const activeTab = useSelector((state: RootState) => state.editor.tab);
 
   const ActiveTabContent = () => {
     switch(activeTab) {
-      case EditorTab.Chunk: {
-        return <p>Chunk editor</p>;
-      }
       case EditorTab.Tile: {
         return <p>Tile editor</p>;
       }
-      case EditorTab.Export: {
-        return <p>Exporter</p>;
+      case EditorTab.Chunk: {
+        return <p>Chunk editor</p>;
+      }
+      case EditorTab.LoadSave: {
+        return <>
+          <Importer />
+        </>;
       }
       case EditorTab.Level:
       default: {
