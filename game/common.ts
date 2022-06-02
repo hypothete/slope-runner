@@ -10,10 +10,10 @@ export interface Positioned {
   y: number;
 }
 export enum Direction {
-  Down,
-  Right,
-  Left,
   Up,
+  Right,
+  Down,
+  Left,
 }
 
 export const GRAVITY = 0.5;

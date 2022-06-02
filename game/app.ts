@@ -1,7 +1,6 @@
 import Camera from './camera';
 import Keyboard from './keyboard';
 import Level from './level';
-import demoLevel from './demo-level';
 import Player from './player';
 import { SCREEN_WIDTH, SCREEN_HEIGHT } from './common';
 
@@ -16,14 +15,15 @@ class Game {
   player: Player;
   camera: Camera;
   keyboard: Keyboard;
-  levels: Level[];
+  levelPaths: string[];
+  levels: Level[] = [];
   activeLevel: number = -1;
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   updateInterval?: number;
   gameSpeed = 30;
 
-  constructor() {
+  constructor(levelPaths: string[]) {
     const canvas = document.querySelector('canvas');
     if (!canvas) {
       throw new Error('No canvas found!');
@@ -34,10 +34,10 @@ class Game {
       throw new Error('Context could not be initialized!');
     }
     this.ctx = ctx;
+    this.levelPaths = levelPaths;
     this.camera = new Camera();
     this.keyboard = new Keyboard();
     this.player = new Player();
-    this.levels = [demoLevel];
     this.animate = this.animate.bind(this);
   }
 
@@ -45,7 +45,20 @@ class Game {
     return this.levels[this.activeLevel];
   }
 
+  async loadLevels() {
+    if (this.levelPaths.length === 0) {
+      throw new Error('No levels to load!');
+    }
+    const levelPromises = this.levelPaths.map(levelPath => {
+      return Level.loadFromFile(levelPath);
+    });
+
+    this.levels = await Promise.all(levelPromises);
+  }
+
   async start() {
+    await this.loadLevels();
+    console.log('Loaded levels')
     this.updateInterval = window.setInterval(() => { this.update(); }, this.gameSpeed);
     this.animate();
   }
@@ -124,5 +137,5 @@ class Game {
   }
 }
 
-const game = new Game();
+const game = new Game(['./data/demo-level.json']);
 game.start();

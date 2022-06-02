@@ -11,6 +11,7 @@ import {
 const HALF_TILE = TILE_SIZE / 2;
 
 interface TileOptions {
+  id: number;
   height: number[];
   hFlip: boolean; // used for reading heights and drawing tile
   vFlip: boolean;
@@ -20,6 +21,7 @@ interface TileOptions {
 }
 
 export class Tile {
+  id: number = -1;
   height: number[] = new Array(16).fill(0);
   hFlip: boolean = false;
   vFlip: boolean = false;
@@ -106,6 +108,18 @@ export class Chunk {
   constructor(options: ChunkOptions) {
     Object.assign(this, options);
   }
+}
+
+interface LevelData {
+  name: string;
+  width: number;
+  height: number;
+  tiles: TileOptions[];
+  chunks: ChunkOptions[];
+  data: number[];
+  startX: number;
+  startY: number;
+  tileSrc: string;
 }
 
 interface LevelOptions {
@@ -247,6 +261,23 @@ class Level {
         chunkX++;
       });
     }
+  }
+
+  static async loadFromFile(path: string) {
+    const levelData: LevelData = await fetch(path).then(res => res.json());
+    const tiles = levelData.tiles.map(tileData => {
+      return new Tile(tileData);
+    });
+    const chunks = levelData.chunks.map(chunkData => {
+      return new Chunk(chunkData);
+    });
+    const level = new Level({
+      ...levelData,
+      tiles,
+      chunks
+    });
+    console.log(`Loaded ${level.name}`)
+    return level;
   }
 }
 
