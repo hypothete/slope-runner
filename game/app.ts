@@ -58,7 +58,8 @@ class Game {
 
   async start() {
     await this.loadLevels();
-    console.log('Loaded levels')
+    console.log('Loaded levels');
+    this.update();
     this.updateInterval = window.setInterval(() => { this.update(); }, this.gameSpeed);
     this.animate();
   }
@@ -88,8 +89,10 @@ class Game {
 
   updateTitle() {
     //if (this.keyboard.keys['z']) {
-      this.state = GameState.Playing;
-      this.startLevel(0);
+      
+      this.startLevel(0).then(() => {
+        this.state = GameState.Playing;
+      });
     //}
   }
 

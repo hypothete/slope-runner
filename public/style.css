@@ -10,9 +10,12 @@ body {
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
-canvas {
+#game {
     width: 640px;
     height: 448px;
+}
+
+canvas {
     image-rendering: pixelated;
     font-smooth: never;
     -webkit-font-smoothing : none;

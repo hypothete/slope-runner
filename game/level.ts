@@ -1,3 +1,5 @@
+import { drawChunk } from '../common/drawing';
+import { LevelImportData } from '../editor/redux-types';
 import {
   SCREEN_WIDTH,
   SCREEN_HEIGHT,
@@ -99,27 +101,17 @@ export class Tile {
 }
 
 interface ChunkOptions {
+  id: number;
   tiles: number[];
 }
 
 export class Chunk {
+  id: number = -1;
   tiles = new Array(64);
 
   constructor(options: ChunkOptions) {
     Object.assign(this, options);
   }
-}
-
-interface LevelData {
-  name: string;
-  width: number;
-  height: number;
-  tiles: TileOptions[];
-  chunks: ChunkOptions[];
-  data: number[];
-  startX: number;
-  startY: number;
-  tileSrc: string;
 }
 
 interface LevelOptions {
@@ -188,62 +180,6 @@ class Level {
     }
   }
 
-  drawTile(ctx: CanvasRenderingContext2D, tile: Tile, x: number, y: number) {
-    ctx.save();
-
-    ctx.translate(
-      tile.hFlip ? x + TILE_SIZE : x,
-      tile.vFlip ? y + TILE_SIZE : y,
-    );
-
-    ctx.scale(
-      tile.hFlip ? -1 : 1,
-      tile.vFlip ? -1 : 1
-    );
-    
-    tile.textures.forEach((texIndex, index) => {
-      const dx = index % 2;
-      const dy = Math.floor(index / 2);
-      if (
-        this.tileTexture &&
-        texIndex * HALF_TILE < this.tileTexture.width
-      ) {
-        ctx.drawImage(
-          this.tileTexture,
-          texIndex * HALF_TILE,
-          0,
-          HALF_TILE,
-          HALF_TILE,
-          dx * HALF_TILE,
-          dy * HALF_TILE,
-          HALF_TILE,
-          HALF_TILE
-        );
-      } else {
-        ctx.fillStyle = 'red';
-        ctx.fillRect(
-          dx * HALF_TILE,
-          dy * HALF_TILE,
-          HALF_TILE,
-          HALF_TILE
-        );
-      }
-    });
-
-    ctx.restore();
-  }
-
-  drawChunk(ctx: CanvasRenderingContext2D, index: number, x: number, y: number) {
-    const chunk = this.chunks[index];
-    for(let i=0; i<chunk.tiles.length; i++) {
-      const tileIndex = chunk.tiles[i];
-      const tile = this.tiles[tileIndex];
-      const tileX = i % CHUNK_TILE_SIZE;
-      const tileY = Math.floor(i / CHUNK_TILE_SIZE);
-      this.drawTile(ctx, tile, x + tileX * TILE_SIZE, y + tileY * TILE_SIZE);
-    }
-  }
-
   draw(ctx: CanvasRenderingContext2D, x: number, y: number) {
     // x and y are pixel locations for top-left corner of the screen
     const chunkStartX = Math.floor(x / CHUNK_SIZE);
@@ -254,17 +190,20 @@ class Level {
     for(let chunkY = chunkStartY; chunkY <= chunkEndY; chunkY++) {
       const sliceStart = chunkY * this.width + chunkStartX;
       const sliceEnd = chunkY * this.width + chunkEndX;
-      const chunkIndices = this.data.slice(sliceStart, sliceEnd);
+      const chunkIds = this.data.slice(sliceStart, sliceEnd);
       let chunkX = chunkStartX;
-      chunkIndices.forEach(chunkIndex => {
-        this.drawChunk(ctx, chunkIndex, chunkX * CHUNK_SIZE, chunkY * CHUNK_SIZE);
+      chunkIds.forEach(chunkId => {
+        const chunk = this.chunks.find(chunk => chunk.id === chunkId);
+        if (!chunk) throw new Error(`Could not find chunk with ID ${chunkId}`);
+        if (!this.tileTexture) throw new Error(`Could not draw chunk: tile texture not loaded`);
+        drawChunk(ctx, this.tileTexture, chunk, this.tiles, chunkX * CHUNK_SIZE, chunkY * CHUNK_SIZE);
         chunkX++;
       });
     }
   }
 
   static async loadFromFile(path: string) {
-    const levelData: LevelData = await fetch(path).then(res => res.json());
+    const levelData: LevelImportData = await fetch(path).then(res => res.json());
     const tiles = levelData.tiles.map(tileData => {
       return new Tile(tileData);
     });

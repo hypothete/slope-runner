@@ -1,0 +1,49 @@
+.editor {
+
+  .tilelist {
+    background-color: #333;
+    list-style-type: none;
+    margin: 0;
+    height: 400px;
+    width: 72px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+}
+
+.swatch {
+  width: 64px;
+  height: 64px;
+  border: 1px solid rgba(0,0,0,0);
+
+  &.active {
+    border: 1px solid rgba(255,255,255,1);
+  }
+}
+
+.active-tile-controls {
+  .preview {
+    width: 256px;
+    height: 256px;
+  }
+
+  .properties {
+    display: flex;
+    flex-direction: column;
+    margin: 1rem;
+    border: 1px solid black;
+    border-radius: 8px;
+  }
+
+  .textures {
+    width: 256px;
+    height: 24px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    background-color: #333;
+  }
+}

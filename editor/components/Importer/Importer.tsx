@@ -13,8 +13,13 @@ const Importer: FC = () => {
     if (!files) return;
     const file = files.item(0);
     if (!file || file.type !== 'application/json') return;
+    // fetch and parse the level file
     const fileText = await file.text();
     const levelImportData: LevelImportData = JSON.parse(fileText);
+    // load tile image
+    const preloadImg = new Image();
+    preloadImg.src = levelImportData.tileSrc;
+
     dispatch(loadLevelFromFile(levelImportData))
   };
 

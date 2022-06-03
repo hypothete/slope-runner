@@ -14,19 +14,27 @@ export const setTab = createAction<EditorTab, 'SET_TAB'>('SET_TAB');
 
 export const loadLevelFromFile = createAction<LevelImportData, 'LOAD_LEVEL_FROM_FILE'>('LOAD_LEVEL_FROM_FILE');
 
+export const setActiveTile = createAction<number, 'SET_ACTIVE_TILE'>('SET_ACTIVE_TILE');
+
 // EDITOR
 
 type EditorState = {
   tab: EditorTab,
+  activeTile: number | null
 };
 
 const initialEditor: EditorState = {
-  tab: EditorTab.LoadSave
+  tab: EditorTab.LoadSave,
+  activeTile: null
 };
 
 export const editorReducer = createReducer(initialEditor, builder => {
   builder.addCase(setTab, (state, action) => {
     state.tab = action.payload;
+  });
+
+  builder.addCase(setActiveTile, (state, action) => {
+    state.activeTile = action.payload;
   });
 });
 
