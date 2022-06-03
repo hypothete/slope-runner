@@ -13,7 +13,6 @@ const TileEditor: FC = () => {
 
   return (
     <div className={styles.editor}>
-      <p>Tile Editor</p>
 
       <ActiveTileControls />
 

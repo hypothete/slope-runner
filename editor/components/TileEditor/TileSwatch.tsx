@@ -18,6 +18,7 @@ const TileEditor: FC<TileSwatchProps> = ({ tile, active }) => {
     if (!tileTextureImage) return;
     const ctx = canRef.current?.getContext('2d');
     if (!ctx) return;
+    ctx.clearRect(0,0,TILE_SIZE,TILE_SIZE);
     drawTile(ctx, tileTextureImage, tile, 0, 0);
   }, [
     tileTextureImage

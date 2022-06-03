@@ -11,10 +11,9 @@ export enum EditorTab {
 // ACTION CREATORS
 
 export const setTab = createAction<EditorTab, 'SET_TAB'>('SET_TAB');
-
 export const loadLevelFromFile = createAction<LevelImportData, 'LOAD_LEVEL_FROM_FILE'>('LOAD_LEVEL_FROM_FILE');
-
 export const setActiveTile = createAction<number, 'SET_ACTIVE_TILE'>('SET_ACTIVE_TILE');
+export const updateTile = createAction<Partial<TileData>, 'UPDATE_TILE'>('UPDATE_TILE');
 
 // EDITOR
 
@@ -45,6 +44,13 @@ const initialTiles: TileData[] = [];
 export const tilesReducer = createReducer(initialTiles, builder => {
   builder.addCase(loadLevelFromFile, (state, action) => {
     return action.payload.tiles;
+  });
+
+  builder.addCase(updateTile, (state, action) => {
+    const tileIndex = state.findIndex(tile => tile.id === action.payload.id);
+    if (tileIndex > -1) {
+      state[tileIndex] = {...state[tileIndex], ...action.payload};
+    }
   });
 });
 
