@@ -38,6 +38,7 @@
   display: grid;
   grid-template-areas:
     "preview preview properties"
+    "preview preview heightmap"
     "preview preview textures"
   ;
 
@@ -54,6 +55,19 @@
     justify-content: flex-start;
     margin: 1rem;
     grid-area: properties;
+  }
+
+  .height-container {
+    grid-area: heightmap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .active-height-map {
+    width: 128px;
+    height: 128px;
   }
 
   .textures {

@@ -6,6 +6,7 @@ import { useTextureImage } from '../../hooks';
 import { updateTile } from '../../reducers';
 import { TileData } from '../../redux-types';
 import { RootState } from '../../store';
+import ActiveHeightMap from './ActiveHeightMap';
 import styles from './style.module.scss';
 
 const ActiveTileControls: FC = () => {
@@ -109,6 +110,9 @@ const ActiveTileControls: FC = () => {
             />
           </label>
         </div>
+      </div>
+      <div className={styles['height-container']}>
+        <ActiveHeightMap />
       </div>
       <div className={styles.textures}>textures</div>
     </div>
