@@ -744,7 +744,7 @@ class Player {
     ctx.fillStyle = 'white';
     ctx.fillText(`${this.groundSpeed} ${this.grounded ? 'true' :'false'}`, this.x + 32, this.y - 50);
     ctx.fillText(this.rotationString, this.x + 32, this.y - 40);
-    ctx.fillText(this.angle + '', this.x + 32, this.y - 30);
+    ctx.fillText((this.angle * 180 / Math.PI).toFixed(1) + '', this.x + 32, this.y - 30);
     ctx.fillText(this.stateString, this.x + 32, this.y - 20);
     ctx.fillText(this.spinrev + '', this.x + 32, this.y - 10);
   }

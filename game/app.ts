@@ -22,7 +22,7 @@ class Game {
   ctx: CanvasRenderingContext2D;
   updateInterval?: number;
   requestId?: number;
-  gameSpeed = 30;
+  gameSpeed = 34;
 
   constructor(levelPaths: string[]) {
     const canvas = document.querySelector('canvas');
