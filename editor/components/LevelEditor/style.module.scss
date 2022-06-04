@@ -1,0 +1,58 @@
+.editor {
+  display: grid;
+  grid-template-areas:
+  "preview preview properties"
+  "preview preview chunklist"
+  ;
+}
+
+.preview {
+  grid-area: preview;
+  width: 640px;
+  height: 480px;
+  border: 4px solid black;
+  margin-right: 1rem;
+  overflow: scroll;
+  
+  .preview-canvas {
+
+  }
+}
+
+.properties {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin: 1rem;
+  grid-area: properties;
+
+  input {
+    margin-right: 1rem;
+    min-width: 2rem;
+  }
+
+  label {
+    margin-right: 1.5rem;
+  }
+
+  > * {
+    margin-bottom:1rem;
+  }
+}
+
+.chunklist {
+  background-color: #333;
+  list-style-type: none;
+  margin: 0 0 0 1rem;
+  padding: 1rem;
+  height: 144px;
+  width: 400px;
+  overflow-y: hidden;
+  overflow-x: scroll;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  grid-area: chunklist;
+}

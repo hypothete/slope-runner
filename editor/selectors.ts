@@ -21,3 +21,4 @@ export const useTiles = () => useSelector((state: RootState) => state.tiles);
 
 export const useChunks = () => useSelector((state: RootState) => state.chunks);
 
+export const useLevel = () => useSelector((state: RootState) => state.level);

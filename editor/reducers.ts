@@ -25,6 +25,8 @@ export const addNewChunk = createAction<Partial<ChunkData> | undefined, 'ADD_NEW
 export const deleteChunk = createAction<number, 'DELETE_CHUNK'>('DELETE_CHUNK');
 export const updateChunk = createAction<Partial<ChunkData>, 'UPDATE_CHUNK'>('UPDATE_CHUNK');
 
+export const updateLevel = createAction<Partial<LevelData>, 'UPDATE_LEVEL'>('UPDATE_LEVEL');
+
 // EDITOR
 
 type EditorState = {
@@ -156,5 +158,32 @@ export const levelReducer = createReducer(initialLevel, builder => {
   builder.addCase(loadLevelFromFile, (state, action) => {
     const { chunks, tiles, ...level } = action.payload;
     return level;
+  });
+
+  builder.addCase(updateLevel, (state, action) => {
+    // special case - resizing the level
+    if (action.payload.width || action.payload.height) {
+      const newDimensions = { 
+        width: action.payload.width || state.width,
+        height: action.payload.height || state.height
+      };
+
+      const newData = new Array(newDimensions.width * newDimensions.height).fill(0);
+
+      // place old level data into new data
+      state.data.forEach((tileId, index) => {
+        const oldX = index % state.width;
+        const oldY = Math.floor(index / state.width);
+        if (oldX < newDimensions.width && oldY < newDimensions.height) {
+          const newIndex = oldY * newDimensions.width + oldX;
+          newData[newIndex] = tileId;
+        }
+      });
+
+      return {...state, ...action.payload, data: newData};
+
+    } else {
+      return {...state, ...action.payload};
+    }
   });
 });
