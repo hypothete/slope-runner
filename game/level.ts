@@ -1,5 +1,5 @@
 import { drawChunk } from './drawing';
-import { LevelImportData } from '../redux-types';
+import { ChunkData, LevelImportData, TileData } from '../redux-types';
 import {
   SCREEN_WIDTH,
   SCREEN_HEIGHT,
@@ -10,18 +10,6 @@ import {
   Positioned
 } from './common';
 
-const HALF_TILE = TILE_SIZE / 2;
-
-interface TileOptions {
-  id: number;
-  height: number[];
-  hFlip: boolean; // used for reading heights and drawing tile
-  vFlip: boolean;
-  angle: number;
-  solid: Direction[];
-  textures: number[];
-}
-
 export class Tile {
   id: number = -1;
   height: number[] = new Array(16).fill(0);
@@ -31,7 +19,7 @@ export class Tile {
   solid = new Array<Direction>(4);
   textures: number[] = new Array(4).fill(0);
 
-  constructor(options: TileOptions) {
+  constructor(options: TileData) {
     Object.assign(this, options);
   }
 
@@ -100,30 +88,13 @@ export class Tile {
   }
 }
 
-interface ChunkOptions {
-  id: number;
-  tiles: number[];
-}
-
 export class Chunk {
   id: number = -1;
   tiles = new Array(64);
 
-  constructor(options: ChunkOptions) {
+  constructor(options: ChunkData) {
     Object.assign(this, options);
   }
-}
-
-interface LevelOptions {
-  name: string;
-  width: number; // width and height are in chunks
-  height: number;
-  tiles: Tile[];
-  chunks: Chunk[];
-  data: number[]; // chunk ID array
-  startX: number;
-  startY: number;
-  tileSrc: string;
 }
 
 class Level {
@@ -138,8 +109,17 @@ class Level {
   tileSrc?: string;
   tileTexture?: HTMLImageElement;
 
-  constructor(options: LevelOptions) {
-    Object.assign(this, options);
+  constructor(options: LevelImportData) {
+    const { chunks: chunksData, tiles: tilesData, ...levelData } = options;
+
+    const tiles = tilesData.map(tileData => {
+      return new Tile(tileData);
+    });
+    const chunks = chunksData.map(chunkData => {
+      return new Chunk(chunkData);
+    });
+
+    Object.assign(this, { tiles, chunks, ...levelData});
   }
 
   get pixelWidth() {
@@ -204,17 +184,7 @@ class Level {
 
   static async loadFromFile(path: string) {
     const levelData: LevelImportData = await fetch(path).then(res => res.json());
-    const tiles = levelData.tiles.map(tileData => {
-      return new Tile(tileData);
-    });
-    const chunks = levelData.chunks.map(chunkData => {
-      return new Chunk(chunkData);
-    });
-    const level = new Level({
-      ...levelData,
-      tiles,
-      chunks
-    });
+    const level = new Level(levelData);
     console.log(`Loaded ${level.name}`)
     return level;
   }

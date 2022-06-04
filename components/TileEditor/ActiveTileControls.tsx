@@ -10,6 +10,8 @@ import ActiveHeightMap from './ActiveHeightMap';
 import styles from './style.module.scss';
 import TexturePalette from './TexturePalette';
 
+const PREVIEW_SCALE = 12;
+
 const ActiveTileControls: FC = () => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
   const activeTile = useActiveTile();
@@ -53,8 +55,14 @@ const ActiveTileControls: FC = () => {
   const handlePreviewClick = (evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     const rect = canRef.current?.getBoundingClientRect();
     if (!rect || !canRef.current || activeTexture == null) return;
-    const clickX = Math.floor((evt.clientX - rect.left) / (24 * HALF_TILE));
-    const clickY = Math.floor((evt.clientY - rect.top) / (24 * HALF_TILE));
+    let clickX = Math.floor((evt.clientX - rect.left) / (PREVIEW_SCALE * TILE_SIZE));
+    if (activeTile.hFlip) {
+      clickX = (clickX + 1) % 2;
+    }
+    let clickY = Math.floor((evt.clientY - rect.top) / (PREVIEW_SCALE * TILE_SIZE));
+    if (activeTile.vFlip) {
+      clickY = (clickY + 1) % 2;
+    }
     let newTextures = [...activeTile.textures];
     newTextures[clickY * 2 + clickX] = activeTexture;
     updateTileValue({ textures: newTextures })
