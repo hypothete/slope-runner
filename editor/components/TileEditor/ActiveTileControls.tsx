@@ -1,13 +1,14 @@
 import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { drawTile } from '../../../common/drawing';
-import { Direction, TILE_SIZE } from '../../../game/common';
+import { Direction, HALF_TILE, TILE_SIZE } from '../../../game/common';
 import { useTextureImage } from '../../hooks';
 import { updateTile } from '../../reducers';
 import { TileData } from '../../redux-types';
 import { RootState } from '../../store';
 import ActiveHeightMap from './ActiveHeightMap';
 import styles from './style.module.scss';
+import TexturePalette from './TexturePalette';
 
 const ActiveTileControls: FC = () => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
@@ -15,17 +16,20 @@ const ActiveTileControls: FC = () => {
     const { activeTile } = state.editor;
     return state.tiles.find(tile => tile.id === activeTile);
   });
+  const activeTexture = useSelector((state: RootState) => {
+    return state.editor.activeTexture;
+  });
   const tileTextureImage = useTextureImage();
   const dispatch = useDispatch();
   const updateTileValue = (partial: Partial<TileData>) => {
-    dispatch(updateTile({ id: activeTile?.id, ...partial}));
+    dispatch(updateTile({ id: activeTile?.id, ...partial }));
   };
 
   useEffect(() => {
     if (!(tileTextureImage && activeTile)) return;
     const ctx = canRef.current?.getContext('2d');
     if (!ctx) return;
-    ctx.clearRect(0,0,TILE_SIZE,TILE_SIZE);
+    ctx.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
     drawTile(ctx, tileTextureImage, activeTile, 0, 0);
 
   }, [
@@ -49,9 +53,24 @@ const ActiveTileControls: FC = () => {
     }
   };
 
+  const handlePreviewClick = (evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const rect = canRef.current?.getBoundingClientRect();
+    if (!rect || !canRef.current || activeTexture == null) return;
+    const clickX = Math.floor((evt.clientX - rect.left) / (24 * HALF_TILE));
+    const clickY = Math.floor((evt.clientY - rect.top) / (24 * HALF_TILE));
+    let newTextures = [...activeTile.textures];
+    newTextures[clickY * 2 + clickX] = activeTexture;
+    updateTileValue({ textures: newTextures })
+  };
+
   return (
     <div className={styles['active-tile-controls']}>
-      <canvas className={styles.preview} ref={canRef} width={TILE_SIZE} height={TILE_SIZE}></canvas>
+      <canvas className={styles.preview}
+        ref={canRef} 
+        width={TILE_SIZE}
+        height={TILE_SIZE}
+        onClick={evt => handlePreviewClick(evt)}>
+      </canvas>
       <div className={styles.properties} >
         <b>{`Tile ${activeTile.id}`}</b>
         <div>
@@ -80,7 +99,7 @@ const ActiveTileControls: FC = () => {
         </label>
         <div>
           <b>Solid</b>
-          <br/>
+          <br />
           <label>
             Up
             <input type="checkbox"
@@ -112,9 +131,16 @@ const ActiveTileControls: FC = () => {
         </div>
       </div>
       <div className={styles['height-container']}>
+        <b>Height map</b>
         <ActiveHeightMap />
       </div>
-      <div className={styles.textures}>textures</div>
+      <div>
+        <b>Active texture</b>
+        <br />
+        <div className={styles.textures}>
+          <TexturePalette />
+        </div>
+      </div>
     </div>
   );
 };

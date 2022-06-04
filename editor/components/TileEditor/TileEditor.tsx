@@ -4,7 +4,7 @@ import { RootState } from '../../store';
 import ActiveTileControls from './ActiveTileControls';
 import TileSwatch from './TileSwatch';
 import styles from './style.module.scss';
-import { setActiveTile } from '../../reducers';
+import { addNewTile, setActiveTile } from '../../reducers';
 
 const TileEditor: FC = () => {
   const tiles = useSelector((state: RootState) => state.tiles);
@@ -17,7 +17,11 @@ const TileEditor: FC = () => {
       <ActiveTileControls />
 
       <ul className={styles.tilelist}>
-          <li>Add tile</li>
+          <li>
+            <button onClick={() => { dispatch(addNewTile()); }}>
+              Add tile
+            </button>
+          </li>
         {
           tiles.map(tile => (
             <li key={tile.id} onClick={() => dispatch(setActiveTile(tile.id))}>

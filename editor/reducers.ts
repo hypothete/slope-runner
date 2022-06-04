@@ -14,17 +14,21 @@ export const setTab = createAction<EditorTab, 'SET_TAB'>('SET_TAB');
 export const loadLevelFromFile = createAction<LevelImportData, 'LOAD_LEVEL_FROM_FILE'>('LOAD_LEVEL_FROM_FILE');
 export const setActiveTile = createAction<number, 'SET_ACTIVE_TILE'>('SET_ACTIVE_TILE');
 export const updateTile = createAction<Partial<TileData>, 'UPDATE_TILE'>('UPDATE_TILE');
+export const addNewTile = createAction<undefined, 'ADD_NEW_TILE'>('ADD_NEW_TILE');
+export const setActiveTexture = createAction<number, 'SET_ACTIVE_TEXTURE'>('SET_ACTIVE_TEXTURE');
 
 // EDITOR
 
 type EditorState = {
   tab: EditorTab,
-  activeTile: number | null
+  activeTile: number | null,
+  activeTexture: number | null,
 };
 
 const initialEditor: EditorState = {
   tab: EditorTab.LoadSave,
-  activeTile: null
+  activeTile: null,
+  activeTexture: 0
 };
 
 export const editorReducer = createReducer(initialEditor, builder => {
@@ -34,6 +38,14 @@ export const editorReducer = createReducer(initialEditor, builder => {
 
   builder.addCase(setActiveTile, (state, action) => {
     state.activeTile = action.payload;
+  });
+
+  builder.addCase(setActiveTexture, (state, action) => {
+    if (state.activeTexture == action.payload) {
+      state.activeTexture = null;
+    } else {
+      state.activeTexture = action.payload;
+    }
   });
 });
 
@@ -51,6 +63,24 @@ export const tilesReducer = createReducer(initialTiles, builder => {
     if (tileIndex > -1) {
       state[tileIndex] = {...state[tileIndex], ...action.payload};
     }
+  });
+
+  builder.addCase(addNewTile, (state) => {
+    let newId = 0;
+    state.forEach(tile => {
+      if (tile.id > newId) {
+        newId = tile.id + 1;
+      }
+    });
+    state.push({
+      id: newId,
+      height: new Array(16).fill(0),
+      hFlip: false,
+      vFlip: false,
+      solid: [],
+      angle: 0,
+      textures: [0,0,0,0]
+    })
   });
 });
 
