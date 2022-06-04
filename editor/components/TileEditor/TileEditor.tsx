@@ -25,7 +25,7 @@ const TileEditor: FC = () => {
         {
           tiles.map(tile => (
             <li key={tile.id} onClick={() => dispatch(setActiveTile(tile.id))}>
-              <TileSwatch tile={tile} active={tile.id === activeTile} />
+              <TileSwatch tile={tile} active={tile.id === activeTile} useControls />
             </li>
           ))
         }

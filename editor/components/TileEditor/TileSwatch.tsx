@@ -9,10 +9,11 @@ import styles from './style.module.scss';
 
 type TileSwatchProps = {
   tile: TileData,
-  active: boolean
+  active: boolean,
+  useControls: boolean
 };
 
-const TileEditor: FC<TileSwatchProps> = ({ tile, active }) => {
+const TileSwatch: FC<TileSwatchProps> = ({ tile, active, useControls }) => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
   const tileTextureImage = useTextureImage();
   const dispatch = useDispatch();
@@ -30,7 +31,7 @@ const TileEditor: FC<TileSwatchProps> = ({ tile, active }) => {
     if (!tileTextureImage) return;
     const ctx = canRef.current?.getContext('2d');
     if (!ctx) return;
-    ctx.clearRect(0,0,TILE_SIZE,TILE_SIZE);
+    ctx.clearRect(0, 0, TILE_SIZE, TILE_SIZE);
     drawTile(ctx, tileTextureImage, tile, 0, 0);
   }, [
     tileTextureImage
@@ -39,10 +40,16 @@ const TileEditor: FC<TileSwatchProps> = ({ tile, active }) => {
   return (
     <div className={styles.swatch}>
       <canvas className={[styles['swatch-canvas'], active ? styles.active : ''].join(' ')} ref={canRef} width={TILE_SIZE} height={TILE_SIZE}></canvas>
-      <button className={styles['swatch-button']} title={`Delete`} onClick={(evt) => handleDelete(evt)}>🗑</button>
-      <button className={styles['swatch-button']} title={`Copy`} onClick={(evt) => handleCopy(evt)}>👯‍♀️</button>
+      {
+        useControls && (
+          <>
+            <button className={styles['swatch-button']} title={`Delete`} onClick={(evt) => handleDelete(evt)}>🗑</button>
+            <button className={styles['swatch-button']} title={`Copy`} onClick={(evt) => handleCopy(evt)}>👯‍♀️</button>
+          </>
+        )
+      }
     </div>
   );
 };
 
-export default TileEditor;
+export default TileSwatch;
