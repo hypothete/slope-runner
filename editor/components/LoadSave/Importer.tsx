@@ -25,7 +25,8 @@ const Importer: FC = () => {
 
   return (
     <div className={styles.importer}>
-      <p>Select a file to import</p>
+      <b>Select a file to import</b>
+      <br />
       <input type="file" onChange={(evt) => handleFile(evt.target.files)} />
     </div>
   );

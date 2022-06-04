@@ -1,7 +1,9 @@
 import React, { FC, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { drawTile } from '../../../common/drawing';
 import { TILE_SIZE } from '../../../game/common';
 import { useTextureImage } from '../../hooks';
+import { addNewTile, deleteTile } from '../../reducers';
 import { TileData } from '../../redux-types';
 import styles from './style.module.scss';
 
@@ -13,6 +15,16 @@ type TileSwatchProps = {
 const TileEditor: FC<TileSwatchProps> = ({ tile, active }) => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
   const tileTextureImage = useTextureImage();
+  const dispatch = useDispatch();
+
+  const handleCopy = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    evt.stopPropagation();
+    dispatch(addNewTile(tile));
+  };
+  const handleDelete = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    evt.stopPropagation();
+    dispatch(deleteTile(tile.id));
+  };
 
   useEffect(() => {
     if (!tileTextureImage) return;
@@ -25,7 +37,11 @@ const TileEditor: FC<TileSwatchProps> = ({ tile, active }) => {
   ]);
 
   return (
-    <canvas className={[styles.swatch, active ? styles.active : ''].join(' ')} ref={canRef} width={TILE_SIZE} height={TILE_SIZE}></canvas>
+    <div className={styles.swatch}>
+      <canvas className={[styles['swatch-canvas'], active ? styles.active : ''].join(' ')} ref={canRef} width={TILE_SIZE} height={TILE_SIZE}></canvas>
+      <button className={styles['swatch-button']} title={`Delete`} onClick={(evt) => handleDelete(evt)}>🗑</button>
+      <button className={styles['swatch-button']} title={`Copy`} onClick={(evt) => handleCopy(evt)}>👯‍♀️</button>
+    </div>
   );
 };
 

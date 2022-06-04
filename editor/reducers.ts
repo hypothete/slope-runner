@@ -14,7 +14,8 @@ export const setTab = createAction<EditorTab, 'SET_TAB'>('SET_TAB');
 export const loadLevelFromFile = createAction<LevelImportData, 'LOAD_LEVEL_FROM_FILE'>('LOAD_LEVEL_FROM_FILE');
 export const setActiveTile = createAction<number, 'SET_ACTIVE_TILE'>('SET_ACTIVE_TILE');
 export const updateTile = createAction<Partial<TileData>, 'UPDATE_TILE'>('UPDATE_TILE');
-export const addNewTile = createAction<undefined, 'ADD_NEW_TILE'>('ADD_NEW_TILE');
+export const addNewTile = createAction<Partial<TileData> | undefined, 'ADD_NEW_TILE'>('ADD_NEW_TILE');
+export const deleteTile = createAction<number, 'DELETE_TILE'>('DELETE_TILE');
 export const setActiveTexture = createAction<number, 'SET_ACTIVE_TEXTURE'>('SET_ACTIVE_TEXTURE');
 
 // EDITOR
@@ -65,22 +66,22 @@ export const tilesReducer = createReducer(initialTiles, builder => {
     }
   });
 
-  builder.addCase(addNewTile, (state) => {
-    let newId = 0;
-    state.forEach(tile => {
-      if (tile.id > newId) {
-        newId = tile.id + 1;
-      }
-    });
+  builder.addCase(addNewTile, (state, action) => {
+    const highestID = Math.max(...state.map(tile => tile.id));
     state.push({
-      id: newId,
       height: new Array(16).fill(0),
       hFlip: false,
       vFlip: false,
       solid: [],
       angle: 0,
-      textures: [0,0,0,0]
-    })
+      textures: [0,0,0,0],
+      ...action.payload,
+      id: highestID + 1
+    });
+  });
+
+  builder.addCase(deleteTile, (state, action) => {
+    return state.filter(tile => tile.id !== action.payload);
   });
 });
 

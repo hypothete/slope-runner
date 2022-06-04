@@ -23,13 +23,38 @@
 }
 
 .swatch {
-  width: 64px;
-  height: 64px;
-  border: 1px solid rgba(0,0,0,0);
-  cursor: pointer;
+  position: relative;
 
-  &.active {
-    border: 1px solid rgba(255,255,255,1);
+  .swatch-canvas {
+    width: 64px;
+    height: 64px;
+    border: 1px solid rgba(0,0,0,0);
+    cursor: pointer;
+  
+    &.active {
+      border: 1px solid rgba(255,255,255,1);
+    }
+  }
+
+  .swatch-button {
+    position: absolute;
+    right: 0.1rem;
+    border: none;
+    background: none;
+    transform: scale(0.75, 0.75);
+
+    &:nth-child(1) {
+      top: 4px;
+    }
+
+    &:nth-child(2) {
+      bottom: 4px;
+    }
+
+    &:hover {
+      cursor: pointer;
+      transform: scale(1.25, 1.25);
+    }
   }
 }
 

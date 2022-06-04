@@ -5,7 +5,7 @@ import { RootState } from './store';
 import { EditorTab } from './reducers';
 
 import TabBar from './components/TabBar/TabBar';
-import Importer from './components/Importer/Importer';
+import LoadSave from './components/LoadSave/LoadSave';
 import ChunkEditor from './components/ChunkEditor/ChunkEditor';
 import LevelEditor from './components/LevelEditor/LevelEditor';
 import TileEditor from './components/TileEditor/TileEditor';
@@ -22,9 +22,7 @@ const App: FC = () => {
         return <ChunkEditor/>;
       }
       case EditorTab.LoadSave: {
-        return <>
-          <Importer />
-        </>;
+        return <LoadSave />;
       }
       case EditorTab.Level:
       default: {

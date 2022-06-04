@@ -91,11 +91,12 @@ const ActiveTileControls: FC = () => {
         </div>
         <label>
           Angle
-          <input type="number"
-            min="0" max="360"
+          <input type="range"
             value={activeTile.angle * 180 / Math.PI}
+            min={0} max={360} step={22.5}
             onChange={evt => { updateTileValue({ angle: Number(evt.target.value) * Math.PI / 180 }); }}
           />
+          {`${(activeTile.angle * 180 / Math.PI).toFixed(1)}`}
         </label>
         <div>
           <b>Solid</b>
