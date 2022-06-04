@@ -25,7 +25,7 @@ const ChunkEditor: FC = () => {
         {
           chunks.map(chunk => (
             <li key={chunk.id} onClick={() => dispatch(setActiveChunk(chunk.id))}>
-              <ChunkSwatch chunk={chunk} active={chunk.id === activeChunk} />
+              <ChunkSwatch chunk={chunk} active={chunk.id === activeChunk} useControls />
             </li>
           ))
         }

@@ -10,10 +10,11 @@ import styles from './style.module.scss';
 
 type ChunkSwatchProps = {
   chunk: ChunkData,
-  active: boolean
+  active: boolean,
+  useControls: boolean,
 };
 
-const ChunkSwatch: FC<ChunkSwatchProps> = ({ chunk, active }) => {
+const ChunkSwatch: FC<ChunkSwatchProps> = ({ chunk, active, useControls }) => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
   const tileTextureImage = useTextureImage();
   const allTiles = useSelector((state: RootState) => state.tiles);
@@ -32,7 +33,7 @@ const ChunkSwatch: FC<ChunkSwatchProps> = ({ chunk, active }) => {
     if (!tileTextureImage) return;
     const ctx = canRef.current?.getContext('2d');
     if (!ctx) return;
-    ctx.clearRect(0,0,CHUNK_SIZE,CHUNK_SIZE);
+    ctx.clearRect(0, 0, CHUNK_SIZE, CHUNK_SIZE);
     drawChunk(ctx, tileTextureImage, chunk, allTiles, 0, 0);
   }, [
     tileTextureImage
@@ -41,8 +42,18 @@ const ChunkSwatch: FC<ChunkSwatchProps> = ({ chunk, active }) => {
   return (
     <div className={styles.swatch}>
       <canvas className={[styles['swatch-canvas'], active ? styles.active : ''].join(' ')} ref={canRef} width={CHUNK_SIZE} height={CHUNK_SIZE}></canvas>
-      <button className={styles['swatch-button']} title={`Delete`} onClick={(evt) => handleDelete(evt)}>🗑</button>
-      <button className={styles['swatch-button']} title={`Copy`} onClick={(evt) => handleCopy(evt)}>👯‍♀️</button>
+      {
+        useControls && (
+          <>
+            {
+              chunk.id !== 0 && (
+                <button className={styles['swatch-button']} title={`Delete`} onClick={(evt) => handleDelete(evt)}>🗑</button>
+              )
+            }
+            <button className={styles['swatch-button']} title={`Copy`} onClick={(evt) => handleCopy(evt)}>👯‍♀️</button>
+          </>
+        )
+      }
     </div>
   );
 };

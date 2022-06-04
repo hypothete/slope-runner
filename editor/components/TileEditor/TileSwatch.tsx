@@ -43,7 +43,11 @@ const TileSwatch: FC<TileSwatchProps> = ({ tile, active, useControls }) => {
       {
         useControls && (
           <>
-            <button className={styles['swatch-button']} title={`Delete`} onClick={(evt) => handleDelete(evt)}>🗑</button>
+            {
+              tile.id !== 0 && (
+                <button className={styles['swatch-button']} title={`Delete`} onClick={(evt) => handleDelete(evt)}>🗑</button>
+              )
+            }
             <button className={styles['swatch-button']} title={`Copy`} onClick={(evt) => handleCopy(evt)}>👯‍♀️</button>
           </>
         )

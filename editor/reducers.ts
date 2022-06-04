@@ -126,6 +126,18 @@ export const chunksReducer = createReducer(initialChunks, builder => {
       state[chunkIndex] = {...state[chunkIndex], ...action.payload};
     }
   });
+
+  // replace tiles with 0 if deleted
+  builder.addCase(deleteTile, (state, action) => {
+    return state.map(chunk => {
+      if (chunk.tiles.includes(action.payload)) {
+        chunk.tiles = chunk.tiles.map(tileId => {
+          return tileId === action.payload ? 0 : tileId;
+        });
+      }
+      return chunk;
+    });
+  });
 });
 
 // LEVEL
