@@ -21,6 +21,7 @@ class Game {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   updateInterval?: number;
+  requestId?: number;
   gameSpeed = 30;
 
   constructor(levelPaths: string[]) {
@@ -64,6 +65,12 @@ class Game {
     this.animate();
   }
 
+  cleanup() {
+    clearInterval(this.updateInterval);
+    this.requestId && cancelAnimationFrame(this.requestId);
+    console.log('Cleaned up game loop');
+  }
+
   update() {
     // physics and input updates
     if (this.state === GameState.Title) {
@@ -77,7 +84,7 @@ class Game {
 
   animate() {
     // drawing updates
-    requestAnimationFrame(this.animate);
+    this.requestId = requestAnimationFrame(this.animate);
     if (this.state === GameState.Title) {
       this.drawTitle();
     } else if (this.state === GameState.Playing) {
@@ -140,5 +147,4 @@ class Game {
   }
 }
 
-const game = new Game(['./data/demo-level.json']);
-game.start();
+export default Game;

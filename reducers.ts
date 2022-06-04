@@ -1,12 +1,13 @@
 import { createAction, createReducer } from "@reduxjs/toolkit";
-import { CHUNK_TILE_SIZE } from "../game/common";
+import { CHUNK_TILE_SIZE } from "./game/common";
 import { ChunkData, LevelData, LevelImportData, TileData } from "./redux-types";
 
 export enum EditorTab {
   Tile,
   Chunk,
   Level,
-  LoadSave
+  LoadSave,
+  Play
 }
 
 // ACTION CREATORS

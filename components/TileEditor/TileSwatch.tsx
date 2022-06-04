@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { drawTile } from '../../../common/drawing';
-import { TILE_SIZE } from '../../../game/common';
+import { drawTile } from '../../game/drawing';
+import { TILE_SIZE } from '../../game/common';
 import { useTextureImage } from '../../hooks';
 import { addNewTile, deleteTile } from '../../reducers';
 import { TileData } from '../../redux-types';

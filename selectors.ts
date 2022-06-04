@@ -1,4 +1,5 @@
 import { useSelector } from 'react-redux';
+import { LevelImportData } from './redux-types';
 import { RootState } from './store';
 
 export const useActiveTab = () => useSelector((state: RootState) => state.editor.tab);
@@ -22,3 +23,8 @@ export const useTiles = () => useSelector((state: RootState) => state.tiles);
 export const useChunks = () => useSelector((state: RootState) => state.chunks);
 
 export const useLevel = () => useSelector((state: RootState) => state.level);
+
+export const useLevelImportData = () => useSelector((state: RootState) => {
+  const { chunks, tiles, level } = state;
+  return { ...level, chunks, tiles } as LevelImportData;
+});

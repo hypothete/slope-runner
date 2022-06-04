@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { drawChunk } from '../../../common/drawing';
-import { CHUNK_SIZE, CHUNK_TILE_SIZE } from '../../../game/common';
+import { drawChunk } from '../../game/drawing';
+import { CHUNK_SIZE, CHUNK_TILE_SIZE } from '../../game/common';
 import { useTextureImage } from '../../hooks';
 import { updateChunk } from '../../reducers';
 import { ChunkData } from '../../redux-types';
@@ -30,7 +30,9 @@ const ActiveChunkControls: FC = () => {
     tileTextureImage, activeChunk
   ]);
 
-  if (!activeChunk) return null;
+  if (!activeChunk) return <p>
+    <b>Pick a chunk to edit</b>
+  </p>;
 
   const handlePreviewClick = (evt: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     const rect = canRef.current?.getBoundingClientRect();

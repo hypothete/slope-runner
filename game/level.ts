@@ -1,5 +1,5 @@
-import { drawChunk } from '../common/drawing';
-import { LevelImportData } from '../editor/redux-types';
+import { drawChunk } from './drawing';
+import { LevelImportData } from '../redux-types';
 import {
   SCREEN_WIDTH,
   SCREEN_HEIGHT,

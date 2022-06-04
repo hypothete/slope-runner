@@ -25,6 +25,10 @@ const TabBar: FC = () => {
     {
       label: 'Load/Save',
       value: EditorTab.LoadSave
+    },
+    {
+      label: 'Play',
+      value: EditorTab.Play
     }
   ]
 

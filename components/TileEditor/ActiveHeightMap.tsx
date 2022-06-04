@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { TILE_SIZE } from '../../../game/common';
+import { TILE_SIZE } from '../../game/common';
 import { updateTile } from '../../reducers';
 import { useActiveTile } from '../../selectors';
 import styles from './style.module.scss';

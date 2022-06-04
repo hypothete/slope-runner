@@ -7,6 +7,7 @@ import ChunkEditor from './components/ChunkEditor/ChunkEditor';
 import LevelEditor from './components/LevelEditor/LevelEditor';
 import TileEditor from './components/TileEditor/TileEditor';
 import { useActiveTab } from './selectors';
+import Game from './components/Game/Game';
 
 const App: FC = () => {
   const activeTab = useActiveTab();
@@ -21,6 +22,9 @@ const App: FC = () => {
       }
       case EditorTab.LoadSave: {
         return <LoadSave />;
+      }
+      case EditorTab.Play: {
+        return <Game />
       }
       case EditorTab.Level:
       default: {

@@ -1,6 +1,6 @@
 import {
   Direction
-} from '../common';
+} from './game/common';
 
 type TileData = {
   id: number;

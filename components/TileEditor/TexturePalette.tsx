@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { HALF_TILE } from '../../../game/common';
+import { HALF_TILE } from '../../game/common';
 import { useTextureImage } from '../../hooks';
 import { setActiveTexture } from '../../reducers';
 import { useActiveTexture } from '../../selectors';

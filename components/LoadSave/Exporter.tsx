@@ -1,17 +1,11 @@
 import React, { FC } from 'react';
-import { useSelector } from 'react-redux';
 
-import { LevelImportData } from '../../redux-types';
-import { RootState } from '../../store';
+import { useLevelImportData } from '../../selectors';
 
 import styles from './style.module.scss';
 
 const Exporter: FC = () => {
-  const levelData: LevelImportData = useSelector((state: RootState) =>  {
-    const { chunks, tiles, level } = state;
-    return { ...level, chunks, tiles };
-  });
-
+  const levelData = useLevelImportData();
   const levelBlob = new Blob([JSON.stringify(levelData, null, 2)], {type: 'application/json'});
 
   return (

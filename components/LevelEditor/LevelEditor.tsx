@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { useDispatch } from 'react-redux';
-import { CHUNK_SIZE } from '../../../game/common';
+import { CHUNK_SIZE } from '../../game/common';
 import { setActiveChunk, updateLevel } from '../../reducers';
 import { LevelData } from '../../redux-types';
 import { useChunks, useActiveChunk, useLevel } from '../../selectors';

@@ -1,5 +1,5 @@
-import { ChunkData, TileData } from "../editor/redux-types";
-import { CHUNK_TILE_SIZE, HALF_TILE, TILE_SIZE } from "../game/common";
+import { ChunkData, TileData } from "../redux-types";
+import { CHUNK_TILE_SIZE, HALF_TILE, TILE_SIZE } from "./common";
 
 export const drawTile = (ctx: CanvasRenderingContext2D, tileTexture: HTMLImageElement, tile: TileData, x: number, y: number): void => {
   ctx.save();

@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { drawTile } from '../../../common/drawing';
-import { Direction, HALF_TILE, TILE_SIZE } from '../../../game/common';
+import { drawTile } from '../../game/drawing';
+import { Direction, HALF_TILE, TILE_SIZE } from '../../game/common';
 import { useTextureImage } from '../../hooks';
 import { updateTile } from '../../reducers';
 import { TileData } from '../../redux-types';
@@ -31,7 +31,9 @@ const ActiveTileControls: FC = () => {
     tileTextureImage, activeTile
   ]);
 
-  if (!activeTile) return null;
+  if (!activeTile) return <p>
+  <b>Pick a tile to edit</b>
+</p>;
 
   const solid = {
     up: activeTile.solid.includes(Direction.Up),

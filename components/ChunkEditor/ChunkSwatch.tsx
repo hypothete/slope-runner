@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { drawChunk } from '../../../common/drawing';
-import { CHUNK_SIZE } from '../../../game/common';
+import { drawChunk } from '../../game/drawing';
+import { CHUNK_SIZE } from '../../game/common';
 import { useTextureImage } from '../../hooks';
 import { addNewChunk, deleteChunk } from '../../reducers';
 import { ChunkData } from '../../redux-types';
