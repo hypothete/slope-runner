@@ -1,13 +1,12 @@
 import React, { FC } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import { RootState } from '../../store';
 import { EditorTab, setTab } from '../../reducers';
-
+import { useActiveTab } from '../../selectors';
 import styles from './style.module.scss';
 
 const TabBar: FC = () => {
-  const activeTab = useSelector((state: RootState) => state.editor.tab);
+  const activeTab = useActiveTab();
   const dispatch = useDispatch();
 
   const tabs = [

@@ -1,7 +1,4 @@
 import React, { FC } from 'react';
-import { useSelector } from 'react-redux';
-
-import { RootState } from './store';
 import { EditorTab } from './reducers';
 
 import TabBar from './components/TabBar/TabBar';
@@ -9,9 +6,10 @@ import LoadSave from './components/LoadSave/LoadSave';
 import ChunkEditor from './components/ChunkEditor/ChunkEditor';
 import LevelEditor from './components/LevelEditor/LevelEditor';
 import TileEditor from './components/TileEditor/TileEditor';
+import { useActiveTab } from './selectors';
 
 const App: FC = () => {
-  const activeTab = useSelector((state: RootState) => state.editor.tab);
+  const activeTab = useActiveTab();
 
   const ActiveTabContent = () => {
     switch(activeTab) {

@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { drawChunk } from '../../../common/drawing';
 import { CHUNK_SIZE } from '../../../game/common';
 import { useTextureImage } from '../../hooks';
 import { addNewChunk, deleteChunk } from '../../reducers';
 import { ChunkData } from '../../redux-types';
-import { RootState } from '../../store';
+import { useTiles } from '../../selectors';
 import styles from './style.module.scss';
 
 type ChunkSwatchProps = {
@@ -17,7 +17,7 @@ type ChunkSwatchProps = {
 const ChunkSwatch: FC<ChunkSwatchProps> = ({ chunk, active, useControls }) => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
   const tileTextureImage = useTextureImage();
-  const allTiles = useSelector((state: RootState) => state.tiles);
+  const allTiles = useTiles();
   const dispatch = useDispatch();
 
   const handleCopy = (evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

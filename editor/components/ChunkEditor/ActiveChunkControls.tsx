@@ -1,24 +1,19 @@
 import React, { FC, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { drawChunk } from '../../../common/drawing';
 import { CHUNK_SIZE, CHUNK_TILE_SIZE } from '../../../game/common';
 import { useTextureImage } from '../../hooks';
 import { updateChunk } from '../../reducers';
 import { ChunkData } from '../../redux-types';
-import { RootState } from '../../store';
+import { useActiveChunk, useActiveTile, useTiles } from '../../selectors';
 import styles from './style.module.scss';
 import TilePalette from './TilePalette';
 
 const ActiveChunkControls: FC = () => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
-  const activeChunk = useSelector((state: RootState) => {
-    const { activeChunk } = state.editor;
-    return state.chunks.find(chunk => chunk.id === activeChunk);
-  });
-  const activeTile = useSelector((state: RootState) => {
-    return state.editor.activeTile;
-  });
-  const allTiles = useSelector((state: RootState) => state.tiles);
+  const activeChunk = useActiveChunk();
+  const activeTile = useActiveTile();
+  const allTiles = useTiles();
   const tileTextureImage = useTextureImage();
   const dispatch = useDispatch();
   const updateChunkValue = (partial: Partial<ChunkData>) => {
@@ -43,7 +38,7 @@ const ActiveChunkControls: FC = () => {
     const clickX = Math.floor(CHUNK_TILE_SIZE * (evt.clientX - rect.left) / (4 * CHUNK_SIZE));
     const clickY = Math.floor(CHUNK_TILE_SIZE * (evt.clientY - rect.top) / (4 * CHUNK_SIZE));
     let newTiles = [...activeChunk.tiles];
-    newTiles[clickY * CHUNK_TILE_SIZE + clickX] = activeTile;
+    newTiles[clickY * CHUNK_TILE_SIZE + clickX] = activeTile.id;
     updateChunkValue({ tiles: newTiles })
   };
 

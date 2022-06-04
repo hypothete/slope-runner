@@ -1,14 +1,14 @@
 import React, { FC } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { useDispatch } from 'react-redux';
 import ActiveTileControls from './ActiveTileControls';
 import TileSwatch from './TileSwatch';
 import styles from './style.module.scss';
 import { addNewTile, setActiveTile } from '../../reducers';
+import { useActiveTile, useTiles } from '../../selectors';
 
 const TileEditor: FC = () => {
-  const tiles = useSelector((state: RootState) => state.tiles);
-  const activeTile = useSelector((state: RootState) => state.editor.activeTile);
+  const tiles = useTiles();
+  const activeTile = useActiveTile();
   const dispatch = useDispatch();
 
   return (
@@ -25,7 +25,7 @@ const TileEditor: FC = () => {
         {
           tiles.map(tile => (
             <li key={tile.id} onClick={() => dispatch(setActiveTile(tile.id))}>
-              <TileSwatch tile={tile} active={tile.id === activeTile} useControls />
+              <TileSwatch tile={tile} active={tile.id === activeTile?.id} useControls />
             </li>
           ))
         }

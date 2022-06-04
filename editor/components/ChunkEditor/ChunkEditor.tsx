@@ -1,14 +1,14 @@
 import React, { FC } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { addNewChunk, setActiveChunk } from '../../reducers';
-import { RootState } from '../../store';
+import { useActiveChunk, useChunks } from '../../selectors';
 import ActiveChunkControls from './ActiveChunkControls';
 import ChunkSwatch from './ChunkSwatch';
 import styles from './style.module.scss';
 
 const ChunkEditor: FC = () => {
-  const chunks = useSelector((state: RootState) => state.chunks);
-  const activeChunk = useSelector((state: RootState) => state.editor.activeChunk);
+  const chunks = useChunks();
+  const activeChunk = useActiveChunk();
   const dispatch = useDispatch();
 
   return (
@@ -25,7 +25,7 @@ const ChunkEditor: FC = () => {
         {
           chunks.map(chunk => (
             <li key={chunk.id} onClick={() => dispatch(setActiveChunk(chunk.id))}>
-              <ChunkSwatch chunk={chunk} active={chunk.id === activeChunk} useControls />
+              <ChunkSwatch chunk={chunk} active={chunk.id === activeChunk?.id} useControls />
             </li>
           ))
         }

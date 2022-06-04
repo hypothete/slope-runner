@@ -1,24 +1,19 @@
 import React, { FC, useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { drawTile } from '../../../common/drawing';
 import { Direction, HALF_TILE, TILE_SIZE } from '../../../game/common';
 import { useTextureImage } from '../../hooks';
 import { updateTile } from '../../reducers';
 import { TileData } from '../../redux-types';
-import { RootState } from '../../store';
+import { useActiveTile, useActiveTexture } from '../../selectors';
 import ActiveHeightMap from './ActiveHeightMap';
 import styles from './style.module.scss';
 import TexturePalette from './TexturePalette';
 
 const ActiveTileControls: FC = () => {
   const canRef = useRef<HTMLCanvasElement | null>(null);
-  const activeTile = useSelector((state: RootState) => {
-    const { activeTile } = state.editor;
-    return state.tiles.find(tile => tile.id === activeTile);
-  });
-  const activeTexture = useSelector((state: RootState) => {
-    return state.editor.activeTexture;
-  });
+  const activeTile = useActiveTile();
+  const activeTexture = useActiveTexture();
   const tileTextureImage = useTextureImage();
   const dispatch = useDispatch();
   const updateTileValue = (partial: Partial<TileData>) => {
