@@ -247,7 +247,7 @@ class Player {
     const sinGroundAngle = Math.sin(this.angle);
     let slopeFactor = this.slopeFactor;
     if (this.state === PlayerState.Rolling) {
-      const upOrDown = Math.sign(sinGroundAngle) === Math.sign(this.groundSpeed);
+      const upOrDown = Math.sign(sinGroundAngle) == Math.sign(this.groundSpeed);
       slopeFactor = upOrDown ? this.slopeRollUp : this.slopeRollDown;
       this.groundSpeed -= slopeFactor * sinGroundAngle;
     } else if (Math.abs(slopeFactor * sinGroundAngle) > 0.05078125){
@@ -608,13 +608,25 @@ class Player {
   }
 
   checkControlLock() {
-    if (this.controlLockTimer === 0 && 
-      ((this.angle > Math.PI / 4) && (this.angle <= Math.PI * 7 / 4)) &&
+    const minSlip = 35 * Math.PI / 180;
+    const maxSlip = 326 * Math.PI / 180;
+    const minFall = 69 * Math.PI / 180;
+    const maxFall = 293 * Math.PI / 180;
+    if (this.grounded && this.controlLockTimer === 0 && 
+      ((this.angle > minSlip) && (this.angle <= maxSlip)) &&
       Math.abs(this.groundSpeed) < 2.5) {
       // engage control lock
-      this.grounded = false;
-      this.groundSpeed = 0;
       this.controlLockTimer = 30;
+      if ((this.angle > minFall) && (this.angle <= maxFall)) {
+        this.grounded = false;
+        this.groundSpeed = 0;
+      } else {
+        if (this.angle < Math.PI) {
+          this.groundSpeed -= 0.5;
+        } else {
+          this.groundSpeed += 0.5;
+        }
+      }
     } else if (this.controlLockTimer > 0 && this.grounded) {
       this.controlLockTimer--;
     }
