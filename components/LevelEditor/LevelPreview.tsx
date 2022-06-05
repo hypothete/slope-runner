@@ -43,6 +43,15 @@ const LevelPreview: FC = () => {
         ctx.fillStyle = 'red';
         ctx.fillRect(chunkX, chunkY, CHUNK_SIZE, CHUNK_SIZE);
       }
+      ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+      ctx.beginPath();
+      const lineX = chunkX + 0.5;
+      const lineY = chunkY + 0.5;
+      ctx.moveTo(lineX, lineY);
+      ctx.lineTo(lineX + CHUNK_SIZE, lineY);
+      ctx.moveTo(lineX, lineY);
+      ctx.lineTo(lineX, lineY + CHUNK_SIZE);
+      ctx.stroke();
     });
 
     // draw start position

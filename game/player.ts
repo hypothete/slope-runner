@@ -54,6 +54,9 @@ class Player {
   rotateBack = 0.0491; // radians to rotate back to 0
 
   debugString = '';
+  debugTile: Positioned = { x: 0, y: 0 };
+  aTile: Positioned = { x: 0, y: 0 };
+  bTile: Positioned = { x: 0, y: 0 };
 
   get widthRadius () {
     return this.state === PlayerState.Standing ? this.standWidthRadius : this.rollWidthRadius;
@@ -151,13 +154,13 @@ class Player {
       case Direction.Left: {
         return {
           x: this.x,
-          y: this.y + this.pushRadius
+          y: this.y - this.pushRadius
         };
       }
       case Direction.Right: {
         return {
           x: this.x,
-          y: this.y - this.pushRadius
+          y: this.y + this.pushRadius
         };
       }
       case Direction.Up: {
@@ -181,13 +184,13 @@ class Player {
       case Direction.Left: {
         return {
           x: this.x,
-          y: this.y - this.pushRadius
+          y: this.y + this.pushRadius
         };
       }
       case Direction.Right: {
         return {
           x: this.x,
-          y: this.y + this.pushRadius
+          y: this.y - this.pushRadius
         };
       }
       case Direction.Up: {
@@ -256,9 +259,9 @@ class Player {
   updateSpeed(input: PlayerInputState) {
     if (this.grounded) {
       if (this.state === PlayerState.Rolling) {
-        if (input.left && this.groundSpeed > 0) {
+        if (this.controlLockTimer === 0 && input.left && this.groundSpeed > 0) {
           this.groundSpeed -= this.rollDeceleration;
-        } else if (input.right && this.groundSpeed < 0) {
+        } else if (this.controlLockTimer === 0 && input.right && this.groundSpeed < 0) {
           this.groundSpeed += this.rollDeceleration;
         }
         if (!input.left && !input.right) {
@@ -269,12 +272,12 @@ class Player {
           this.state = PlayerState.Standing;
         }
       } else if (this.state === PlayerState.Standing) {
-        if (input.left) {
+        if (this.controlLockTimer === 0 && input.left) {
           this.groundSpeed -= this.groundSpeed > 0 ? this.deceleration : this.acceleration;
         } else if (input.right) {
           this.groundSpeed += this.groundSpeed < 0 ? this.deceleration : this.acceleration;
         }
-        if (!input.left && !input.right) {
+        if (this.controlLockTimer === 0 && !input.left && !input.right) {
           // apply running friction
           this.groundSpeed -= Math.sign(this.groundSpeed) * Math.min(Math.abs(this.groundSpeed), this.friction);
         }
@@ -322,6 +325,7 @@ class Player {
     interface FloorSensorDetails {
       offset: Positioned;
       tile: Tile;
+      sensorPosition: Positioned;
     }
 
     const extendSensor = (sensor: Positioned) => {
@@ -403,7 +407,7 @@ class Player {
         y: tileCheckPosition.y + foundOffset.y - sensor.y,
       }
 
-      return { offset: totalOffset, tile };
+      return { offset: totalOffset, tile, sensorPosition: sensor };
     };
 
     const checkA = checkSensor(sensorA);
@@ -413,33 +417,50 @@ class Player {
 
     switch(this.rotation) {
       case Direction.Left: {
-        const minX = Math.min(checkA.offset.x, checkB.offset.x);
+        const minX = Math.max(checkA.offset.x, checkB.offset.x);
         minCheck = minX == checkA.offset.x ? checkA : checkB;
-        minDist = Math.abs(minX);
+        minDist = minX;
         break;
       }
       case Direction.Right: {
-        const minX = Math.max(checkA.offset.x, checkB.offset.x);
+        const minX = Math.min(checkA.offset.x, checkB.offset.x);
         minCheck = minX == checkA.offset.x ? checkA : checkB;
-        minDist = Math.abs(minX);
+        minDist = minX;
         break;
       }
       case Direction.Up: {
         const minY = Math.max(checkA.offset.y, checkB.offset.y);
         minCheck = minY == checkA.offset.y ? checkA : checkB;
-        minDist = Math.abs(minY);
+        minDist = minY;
         break;
       }
       case Direction.Down:
       default: {
         const minY = Math.min(checkA.offset.y, checkB.offset.y);
         minCheck = minY == checkA.offset.y ? checkA : checkB;
-        minDist = Math.abs(minY);
+        minDist = minY;
         break;
       }
     }
 
     // at this point we know which check wins
+    this.aTile = {
+      x: Math.floor((sensorA.x + checkA.offset.x) / TILE_SIZE) * TILE_SIZE,
+      y: Math.floor((sensorA.y + checkA.offset.y) / TILE_SIZE) * TILE_SIZE
+    }
+
+    this.bTile = {
+      x: Math.floor((sensorB.x + checkB.offset.x) / TILE_SIZE) * TILE_SIZE,
+      y: Math.floor((sensorB.y + checkB.offset.y) / TILE_SIZE) * TILE_SIZE
+    }
+
+    this.debugTile = {
+      x: Math.floor((minCheck.sensorPosition.x + minCheck.offset.x) / TILE_SIZE) * TILE_SIZE,
+      y: Math.floor((minCheck.sensorPosition.y + minCheck.offset.y) / TILE_SIZE) * TILE_SIZE
+    }
+
+    this.debugString = `mindist ${minDist}`;
+
     if (minDist <= 14) {
       // move to contact position
 
@@ -552,8 +573,6 @@ class Player {
         }
       }
     }
-   
-    this.debugString = `${offsetDist}`;
   }
 
   checkJumpStart(input: PlayerInputState) {
@@ -585,6 +604,19 @@ class Player {
     }
     if (this.spinrev > 0) {
       this.spinrev = Math.min(this.spinrev, 12);
+    }
+  }
+
+  checkControlLock() {
+    if (this.controlLockTimer === 0 && 
+      ((this.angle > Math.PI / 4) && (this.angle <= Math.PI * 7 / 4)) &&
+      Math.abs(this.groundSpeed) < 2.5) {
+      // engage control lock
+      this.grounded = false;
+      this.groundSpeed = 0;
+      this.controlLockTimer = 30;
+    } else if (this.controlLockTimer > 0 && this.grounded) {
+      this.controlLockTimer--;
     }
   }
 
@@ -634,6 +666,7 @@ class Player {
       this.checkFloorCollisions(level);
 
       // check for falling when ground speed is too low on walls and ceilings
+      this.checkControlLock();
 
     } else if (!this.grounded) {
       // check for jump release
@@ -702,51 +735,62 @@ class Player {
       this.checkFloorCollisions(level);
 
       // check for falling when ground speed is too low on walls and ceilings
+      this.checkControlLock();
     }
   }
 
   draw(ctx: CanvasRenderingContext2D) {
     // width and height
-    ctx.fillStyle = 'rgba(0, 255, 0, 0.6)';
-    ctx.fillRect(
-      this.x - this.widthRadius,
-      this.y - this.heightRadius,
-      this.widthRadius * 2 + 1,
-      this.heightRadius * 2 + 1
-    );
+    // ctx.fillStyle = 'rgba(0, 255, 0, 0.6)';
+    // ctx.fillRect(
+    //   this.x - this.widthRadius,
+    //   this.y - this.heightRadius,
+    //   this.widthRadius * 2 + 1,
+    //   this.heightRadius * 2 + 1
+    // );
 
-    // hitbox
-    ctx.fillStyle = 'rgba(255, 0, 255, 0.6)';
-    ctx.fillRect(
-      this.x - this.hitboxWidthRadius,
-      this.y - this.hitboxHeightRadius,
-      this.hitboxWidthRadius * 2 + 1,
-      this.hitboxHeightRadius * 2 + 1
-    );
+    // // hitbox
+    // ctx.fillStyle = 'rgba(255, 0, 255, 0.6)';
+    // ctx.fillRect(
+    //   this.x - this.hitboxWidthRadius,
+    //   this.y - this.hitboxHeightRadius,
+    //   this.hitboxWidthRadius * 2 + 1,
+    //   this.hitboxHeightRadius * 2 + 1
+    // );
 
     // sensors
     const {sensorA, sensorB, sensorE, sensorF} = this;
     const sensors = [sensorA, sensorB, sensorE, sensorF];
-    const colors = ['#00ff00', '#00cc66', '#ff00ff', '#ff0000'];
+    const colors = ['#00ff00', '#00ffff', '#ff00ff', '#ff0000'];
     sensors.forEach((sensor, index) => {
       ctx.strokeStyle = colors[index];
       ctx.beginPath();
-      ctx.moveTo(this.x, this.y);
-      ctx.lineTo(sensor.x, sensor.y);
+      ctx.moveTo(this.x + 0.5, this.y + 0.5);
+      ctx.lineTo(sensor.x + 0.5, sensor.y + 0.5);
       ctx.stroke();
     });
 
+    // debug tile
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = colors[0];
+    ctx.fillRect(this.aTile.x, this.aTile.y, TILE_SIZE, TILE_SIZE);
+    ctx.fillStyle = colors[1];
+    ctx.fillRect(this.bTile.x, this.bTile.y, TILE_SIZE, TILE_SIZE);
+    ctx.fillStyle = 'rgba(255, 0, 196,0.8)';
+    ctx.fillRect(this.debugTile.x + 2, this.debugTile.y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+    ctx.globalAlpha = 1;
+
     // facing
     ctx.fillStyle = 'red';
-    ctx.fillText(this.facing ? '➡️' : '⬅️', this.x, this.y);
+    // ctx.fillText(this.facing ? '➡️' : '⬅️', this.x, this.y);
 
     // data
     ctx.fillStyle = 'white';
-    ctx.fillText(`${this.groundSpeed} ${this.grounded ? 'true' :'false'}`, this.x + 32, this.y - 50);
+    ctx.fillText(`${this.groundSpeed.toFixed(2)} ${this.grounded ? 'true' :'false'}`, this.x + 32, this.y - 50);
     ctx.fillText(this.rotationString, this.x + 32, this.y - 40);
-    ctx.fillText((this.angle * 180 / Math.PI).toFixed(1) + '', this.x + 32, this.y - 30);
-    ctx.fillText(this.stateString, this.x + 32, this.y - 20);
-    ctx.fillText(this.spinrev + '', this.x + 32, this.y - 10);
+    ctx.fillText((this.angle * 180 / Math.PI).toFixed(2) + '', this.x + 32, this.y - 30);
+    ctx.fillText(this.controlLockTimer + '', this.x + 32, this.y - 20);
+    ctx.fillText(this.debugString + '', this.x + 32, this.y - 10);
   }
 }
 

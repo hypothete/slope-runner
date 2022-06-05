@@ -24,7 +24,7 @@ export class Tile {
   }
 
   get isEmpty() {
-    return !this.height.some(column => column > 0);
+    return this.height.every(column => column === 0);
   }
 
   get isFull() {
@@ -35,10 +35,10 @@ export class Tile {
     if (!this.solid.includes(direction)) return { x: 0, y: 0};
     let { x, y } = position;
     if (this.hFlip) {
-      x = TILE_SIZE - x;
+      x = TILE_SIZE - 1 - x;
     }
     if (this.vFlip) {
-      y = TILE_SIZE - y;
+      y = TILE_SIZE - 1 - y;
     }
     switch(direction) {
       case Direction.Left: {
