@@ -149,31 +149,91 @@ class Player {
     }
   }
 
-  get sensorE() {
+  get sensorC() {
     switch(this.rotation) {
       case Direction.Left: {
         return {
-          x: this.x,
-          y: this.y - this.pushRadius
+          x: this.x + this.heightRadius,
+          y: this.y - this.widthRadius
         };
       }
       case Direction.Right: {
         return {
-          x: this.x,
-          y: this.y + this.pushRadius
+          x: this.x - this.heightRadius,
+          y: this.y + this.widthRadius
         };
       }
       case Direction.Up: {
         return {
-          x: this.x + this.pushRadius,
-          y: this.y
+          x: this.x + this.widthRadius,
+          y: this.y + this.heightRadius
         };
       }
       case Direction.Down:
       default: {
         return {
-          x: this.x - this.pushRadius,
-          y: this.y + (this.angle === 0 ? 8 : 0)
+          x: this.x - this.widthRadius,
+          y: this.y - this.heightRadius
+        };
+      }
+    }
+  }
+
+  get sensorD() {
+    switch(this.rotation) {
+      case Direction.Left: {
+        return {
+          x: this.x + this.heightRadius,
+          y: this.y + this.widthRadius
+        };
+      }
+      case Direction.Right: {
+        return {
+          x: this.x - this.heightRadius,
+          y: this.y - this.widthRadius
+        };
+      }
+      case Direction.Up: {
+        return {
+          x: this.x - this.widthRadius,
+          y: this.y + this.heightRadius
+        };
+      }
+      case Direction.Down:
+      default: {
+        return {
+          x: this.x + this.widthRadius,
+          y: this.y - this.heightRadius
+        };
+      }
+    }
+  }
+
+  get sensorE() {
+    switch(this.rotation) {
+      case Direction.Left: {
+        return {
+          x: this.x + this.xSpeed,
+          y: this.y + this.ySpeed - this.pushRadius
+        };
+      }
+      case Direction.Right: {
+        return {
+          x: this.x + this.xSpeed,
+          y: this.y + this.ySpeed + this.pushRadius
+        };
+      }
+      case Direction.Up: {
+        return {
+          x: this.x + this.xSpeed + this.pushRadius,
+          y: this.y + this.ySpeed
+        };
+      }
+      case Direction.Down:
+      default: {
+        return {
+          x: this.x + this.xSpeed - this.pushRadius,
+          y: this.y + this.ySpeed + (this.angle === 0 ? 8 : 0)
         };
       }
     }
@@ -183,27 +243,27 @@ class Player {
     switch(this.rotation) {
       case Direction.Left: {
         return {
-          x: this.x,
-          y: this.y + this.pushRadius
+          x: this.x + this.xSpeed,
+          y: this.y + this.ySpeed + this.pushRadius
         };
       }
       case Direction.Right: {
         return {
-          x: this.x,
-          y: this.y - this.pushRadius
+          x: this.x + this.xSpeed,
+          y: this.y + this.ySpeed - this.pushRadius
         };
       }
       case Direction.Up: {
         return {
-          x: this.x - this.pushRadius,
-          y: this.y
+          x: this.x + this.xSpeed - this.pushRadius,
+          y: this.y + this.ySpeed
         };
       }
       case Direction.Down:
       default: {
         return {
-          x: this.x + this.pushRadius,
-          y: this.y + (this.angle === 0 ? 8 : 0)
+          x: this.x + this.xSpeed + this.pushRadius,
+          y: this.y + this.ySpeed + (this.angle === 0 ? 8 : 0)
         };
       }
     }
@@ -458,8 +518,6 @@ class Player {
       x: Math.floor((minCheck.sensorPosition.x + minCheck.offset.x) / TILE_SIZE) * TILE_SIZE,
       y: Math.floor((minCheck.sensorPosition.y + minCheck.offset.y) / TILE_SIZE) * TILE_SIZE
     }
-
-    this.debugString = `mindist ${minDist}`;
 
     if (minDist <= 14) {
       // move to contact position
@@ -771,15 +829,17 @@ class Player {
     // );
 
     // sensors
-    const {sensorA, sensorB, sensorE, sensorF} = this;
-    const sensors = [sensorA, sensorB, sensorE, sensorF];
-    const colors = ['#00ff00', '#00ffff', '#ff00ff', '#ff0000'];
+    const {sensorA, sensorB, sensorC, sensorD, sensorE, sensorF} = this;
+    const sensors = [sensorA, sensorB, sensorC, sensorD, sensorE, sensorF];
+    const colors = ['#00ff00', '#00ffff', '#0066ff', '#ffff00', '#ff00ff', '#ff0000'];
     sensors.forEach((sensor, index) => {
       ctx.strokeStyle = colors[index];
       ctx.beginPath();
       ctx.moveTo(this.x + 0.5, this.y + 0.5);
       ctx.lineTo(sensor.x + 0.5, sensor.y + 0.5);
       ctx.stroke();
+      ctx.fillStyle = 'white';
+      ctx.fillRect(sensor.x, sensor.y, 1, 1);
     });
 
     // debug tile
@@ -802,7 +862,6 @@ class Player {
     ctx.fillText(this.rotationString, this.x + 32, this.y - 40);
     ctx.fillText((this.angle * 180 / Math.PI).toFixed(2) + '', this.x + 32, this.y - 30);
     ctx.fillText(this.controlLockTimer + '', this.x + 32, this.y - 20);
-    ctx.fillText(this.debugString + '', this.x + 32, this.y - 10);
   }
 }
 
